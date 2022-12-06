@@ -1,0 +1,13 @@
+# Project Diary
+
+For each hour you spend working on your project, write exactly two sentences: one describing what you set out to do in that hour and a second describing what you accomplished in that hour. 
+
+# Jiayi
+
+12/05 Monday
+
+2 - 3pm: I was planning to do some literature review on algorithm and evaluation function for coding preparation; I found some valuable resources and designed some good evaluation functions.
+6 - 7pm: I was planning to write functions for calculating how many connected fours are in the board; It felt much harder than I expected, and I was still working on.
+7 - 8pm: Kept working on writing functions... Finished the part of open and half fours for possible columns.
+8 - 9pm: I was planning to write some tests for testing my code; I wrote two tests and both of them passed.
+9 - 10pm: I was planning to wrap up and create a Github repository; I created a Github repository: https://github.com/cjy-2001/CS311-Gomoku and shared with my teammate. 
