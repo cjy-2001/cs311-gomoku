@@ -73,13 +73,15 @@ class Gomoku:
                 if n[0] < 0 or n[1] < 0 or n[0] > BOARD_SIZE - 1 or n[1] > BOARD_SIZE - 1 :
                     continue
                 move_coordinates.add(n)
+            # print(move_coordinates)
                 
             
         for m in move_coordinates:
             state_copy = self.state
-            state_copy[m] = 1
-            if state_copy != self.state
+            if self.state[m] == 0:
+                state_copy[m] = 1
                 lst.append(Gomoku(state_copy, self.state,self.score))
+                
         return lst
 
             

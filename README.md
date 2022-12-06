@@ -1,33 +1,26 @@
-# CS311 Programming Assignment 1
+# CS311 Final Project - Gomoku Algorithum
 
-For this assignment, you will be solving the 8-Puzzle using Breadth First Search (BFS) and A* Search. Refer to the Canvas assignment for assignment specifications. This README describes how to run the skeleton code.
+Gomoku, or five in a row, is an abstract strategy board game where two players place a
+stone of their color on a 15x15 empty intersection. The winner is the first whose stones form an unbroken chain of five horizontally, vertically, or diagonally.
+ 
+Our goal is to design an agent that plays with a human player in real time. We intend to optimize both search efficiency and the chances of winning by implementing a minimax tree model and to explore how pruning or heuristic functions may improve the model performance. Some ways to evaluate the model performance include: if the agent will always win given a mistake firstly made by the human player, the number of steps it takes to beat the opponent, and the duration of each search.
 
-## Running the skeleton program
 
-The skeleton code benchmarks your search functions on a set of random starting boards. Executing `search.py` will run BFS on 1000 initial boards by default. You can change the algorithm, the number of test boards, or even specify a specific input by changing the optional arguments shown below.
+## Method
 
-```
-$ python3 search.py -h
-usage: search.py [-h] [-a ALGO] [-i ITER] [-s STATE]
+To resolve computational difficulties, we’ll start by a small board size and try limiting the depth and breadth of the tree by, for example, restricting the set of unassigned grids to those adjacent to the assigned ones only or by limiting the depth of the evaluation function. 
 
-Run search algorithms in random inputs
+Several sample codes are available as references for our project, in which the game is a class with functions that initialize the board, determine the game termination, calculate the agent's optimal move, and optimize the minimax via alpha-beta pruning [1]. Our board initialization, meanwhile, will be similar to that of a sudoku in PA2 where we use a dictionary storing the cell indices and its corresponding stones when filled by a player.  For example, in the initial board, all cells will be marked as 0. Then we can use 1 and 2 to denote two players’ moves. Thus the board below would be represented as:
+ [0, 0, 0, 0, 0, 
+  0, 0, 1, 2, 0,
+  0, 0, 1, 0, 0, 
+  0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0]
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -a ALGO, --algo ALGO  Algorithm (one of bfs, astar, astar_custom)
-  -i ITER, --iter ITER  Number of iterations
-  -s STATE, --state STATE
-                        Execute a single iteration using this board configuration specified as
-                        a string, e.g., 123456780
-```
-
-For example, to test the A* algorithm, run the program as `python3 search.py -a astar` or to test a specific input, `python3 search.py -s 123456780`.
-
-If you working with Thonny, recall that you can change the command line arguments by modifying the `%Run` command in the shell, e.g., `%Run search.py -a astar`.
 
 ## Unit testing
 
-To assist you during development, a unit test suite is provided in `search_test.py`. These tests are a subset of the tests run by Gradescope. You can run the tests by executing the `search_test.py` file as a program, e.g. `python3 search_test.py`
+To assist you during development, a unit test suite is provided in `project_test.py`. These tests are a subset of the tests run by Gradescope. You can run the tests by executing the `project_test.py` file as a program, e.g. `python3 project_test.py`
 
 ```
 $ python3 search_test.py
