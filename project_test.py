@@ -33,15 +33,15 @@ class Tests(unittest.TestCase):
         gomoku = project.Gomoku(state=INITIAL_BOARD)
         self.assertEqual(gomoku.is_terminal(), True)
 
-        # INITIAL_BOARD = dict.fromkeys(INITIAL_BOARD, 0)
-        # INITIAL_BOARD[1, 2] = 1
-        # INITIAL_BOARD[2, 3] = 2
-        # INITIAL_BOARD[3, 4] = 2
-        # INITIAL_BOARD[4, 5] = 2
-        # INITIAL_BOARD[5, 6] = 2
-        # INITIAL_BOARD[6, 7] = 2
-        # gomoku = project.Gomoku(state=INITIAL_BOARD)
-        # self.assertEqual(gomoku.is_terminal(), True)
+        INITIAL_BOARD = dict.fromkeys(INITIAL_BOARD, 0)
+        INITIAL_BOARD[1, 2] = 1
+        INITIAL_BOARD[2, 3] = 2
+        INITIAL_BOARD[3, 4] = 2
+        INITIAL_BOARD[4, 5] = 2
+        INITIAL_BOARD[5, 6] = 2
+        INITIAL_BOARD[6, 7] = 2
+        gomoku = project.Gomoku(state=INITIAL_BOARD)
+        self.assertEqual(gomoku.is_terminal(), True)
 
     def test_fours(self):
         BOARD_SIZE = 9

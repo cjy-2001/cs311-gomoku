@@ -10,7 +10,7 @@ from heapq import heapify, heappush, heappop
 from typing import Callable, List, Optional, Sequence, Tuple
 
 
-# Problem constants. The goal is a "blank" (0) in bottom right corner
+# Problem constants. 
 BOARD_SIZE = 9
 INITIAL_BOARD = {}
 
@@ -78,6 +78,8 @@ class Gomoku:
         #start with black
         possible_col_seqs = []
         possible_row_seqs = []
+        possible_diag1_seqs = []
+        possible_diag2_seqs = []
 
         for black in self.blacks:
             row_num = black[0]
@@ -86,6 +88,10 @@ class Gomoku:
             #look for possible row, col, and diag sequence of 5 stones
             possible_col_coordinates = []
             possible_row_coordinates = []
+            possible_diag1_coordinates = []
+            possible_diag2_coordinates = []
+
+            #cols and rows
             for x in range(0, BOARD_SIZE):
                 if abs(x - row_num) <= 5:
                     possible_col_coordinates.append((x, col_num))
@@ -99,12 +105,37 @@ class Gomoku:
             while len(possible_row_coordinates) >= 5:
                 possible_row_seqs.append(possible_row_coordinates[0:5])
                 possible_row_coordinates.pop(0)
+
+            #diag1s
+            #upper left corner
+            row_index = row_num
+            col_index = col_num
+            while (row_index > -1) and (col_index > -1):
+                possible_diag1_coordinates.insert(0, (row_index, col_index))
+                row_index -= 1
+                col_index -= 1
+            
+            #lower right corner
+            row_index = row_num
+            col_index = col_num
+            while (row_index + 1 < BOARD_SIZE) and (col_index + 1 < BOARD_SIZE):
+                possible_diag1_coordinates.append((row_index + 1, col_index + 1))
+                row_index += 1
+                col_index += 1
+            
+            while len(possible_diag1_coordinates) >= 5:
+                possible_diag1_seqs.append(possible_diag1_coordinates[0:5])
+                possible_diag1_coordinates.pop(0)
+
+            
             
         #remove duplicate sequences
         possible_col_seqs.sort()
         possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
         possible_row_seqs.sort()
         possible_row_seqs = list(possible_row_seqs for possible_row_seqs,_ in itertools.groupby(possible_row_seqs))
+        possible_diag1_seqs.sort()
+        possible_diag1_seqs = list(possible_diag1_seqs for possible_diag1_seqs,_ in itertools.groupby(possible_diag1_seqs))
 
         #count how many 5 in a row, seq, or diag
         for possible_col_seq in possible_col_seqs:
@@ -122,11 +153,22 @@ class Gomoku:
                     num_black += 1
             if num_black == 5:
                 black_five += 1
+        
+        # print(possible_diag1_seqs)
+        for possible_diag1_seq in possible_diag1_seqs:
+            num_black = 0
+            for coordinate in possible_diag1_seq:
+                if board[coordinate] == 1:
+                    num_black += 1
+            if num_black == 5:
+                black_five += 1
 
         
         #continue with white
         possible_col_seqs = []
         possible_row_seqs = []
+        possible_diag1_seqs = []
+        possible_diag2_seqs = []
 
         for white in self.whites:
             row_num = white[0]
@@ -135,6 +177,9 @@ class Gomoku:
             #look for possible row, col, and diag sequence of 5 stones
             possible_col_coordinates = []
             possible_row_coordinates = []
+            possible_diag1_coordinates = []
+            possible_diag2_coordinates = []
+            
             for x in range(0, BOARD_SIZE):
                 if abs(x - row_num) <= 5:
                     possible_col_coordinates.append((x, col_num))
@@ -148,12 +193,35 @@ class Gomoku:
             while len(possible_row_coordinates) >= 5:
                 possible_row_seqs.append(possible_row_coordinates[0:5])
                 possible_row_coordinates.pop(0)
+
+            #diag1s
+            #upper left corner
+            row_index = row_num
+            col_index = col_num
+            while (row_index > -1) and (col_index > -1):
+                possible_diag1_coordinates.insert(0, (row_index, col_index))
+                row_index -= 1
+                col_index -= 1
+            
+            #lower right corner
+            row_index = row_num
+            col_index = col_num
+            while (row_index + 1 < BOARD_SIZE) and (col_index + 1 < BOARD_SIZE):
+                possible_diag1_coordinates.append((row_index + 1, col_index + 1))
+                row_index += 1
+                col_index += 1
+            
+            while len(possible_diag1_coordinates) >= 5:
+                possible_diag1_seqs.append(possible_diag1_coordinates[0:5])
+                possible_diag1_coordinates.pop(0)
             
         #remove duplicate sequences
         possible_col_seqs.sort()
         possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
         possible_row_seqs.sort()
         possible_row_seqs = list(possible_row_seqs for possible_row_seqs,_ in itertools.groupby(possible_row_seqs))
+        possible_diag1_seqs.sort()
+        possible_diag1_seqs = list(possible_diag1_seqs for possible_diag1_seqs,_ in itertools.groupby(possible_diag1_seqs))
 
         #count how many 5 in a row, seq, or diag
         for possible_col_seq in possible_col_seqs:
@@ -167,6 +235,14 @@ class Gomoku:
         for possible_row_seq in possible_row_seqs:
             num_white = 0
             for coordinate in possible_row_seq:
+                if board[coordinate] == 2:
+                    num_white += 1
+            if num_white == 5:
+                white_five += 1
+
+        for possible_diag1_seq in possible_diag1_seqs:
+            num_white = 0
+            for coordinate in possible_diag1_seq:
                 if board[coordinate] == 2:
                     num_white += 1
             if num_white == 5:
