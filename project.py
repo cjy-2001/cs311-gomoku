@@ -25,7 +25,7 @@ INITIAL_BOARD[4, 3] = 1
 INITIAL_BOARD[5, 3] = 1
 
 class Gomoku:
-    def __init__(self, state: dict[(int, int): int], parent: "Gomoku" = None, score=0):
+    def __init__(self, state: dict[(int, int): int], parent: "Gomoku" = None, score=0, moves=0):
         """Create Node to track particular state and associated parent and cost
 
         Args:
@@ -36,11 +36,154 @@ class Gomoku:
         self.state = state  # To facilitate "hashable" make state immutable
         self.parent = parent
         self.score = score
-    
+        # Black stone: 1; White stone: 2
+        # = 1 if black wins, = 2 if white wins, = 0 if a draw, otherwise "game_on"
+        self.gameStatus = "game_on" 
+        self.curr_depth = moves
 
-    def is_end(self) -> bool:
-        """Return True if Node has goal state"""
-        pass 
+        blacks = []
+        whites = []
+
+        for (key, value) in state.items():
+            if value == 1:
+                blacks.append(key)
+            else:
+                whites.append(key)
+
+        self.blacks = blacks
+        self.whites = whites
+
+    
+    def is_terminal(self) -> bool:
+        """Return True if board has terminal state"""
+        
+        board = self.state
+
+        if list(board.values()).count(0) == 0:
+            return True
+        
+        #get coordinates of all black and white stones
+        # blacks = []
+        # whites = []
+
+        # for (key, value) in board.items():
+        #     if value == 1:
+        #         blacks.append(key)
+        #     else:
+        #         whites.append(key)
+
+        black_five = 0
+        white_five = 0
+
+        #start with black
+        possible_col_seqs = []
+        possible_row_seqs = []
+
+        for black in self.blacks:
+            row_num = black[0]
+            col_num = black[1]
+            
+            #look for possible row, col, and diag sequence of 5 stones
+            possible_col_coordinates = []
+            possible_row_coordinates = []
+            for x in range(0, BOARD_SIZE):
+                if abs(x - row_num) <= 5:
+                    possible_col_coordinates.append((x, col_num))
+                if abs(x - col_num) <= 5:
+                    possible_row_coordinates.append((row_num, x))
+            
+            while len(possible_col_coordinates) >= 5:
+                possible_col_seqs.append(possible_col_coordinates[0:5])
+                possible_col_coordinates.pop(0)
+
+            while len(possible_row_coordinates) >= 5:
+                possible_row_seqs.append(possible_row_coordinates[0:5])
+                possible_row_coordinates.pop(0)
+            
+        #remove duplicate sequences
+        possible_col_seqs.sort()
+        possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
+        possible_row_seqs.sort()
+        possible_row_seqs = list(possible_row_seqs for possible_row_seqs,_ in itertools.groupby(possible_row_seqs))
+
+        #count how many 5 in a row, seq, or diag
+        for possible_col_seq in possible_col_seqs:
+            num_black = 0
+            for coordinate in possible_col_seq:
+                if board[coordinate] == 1:
+                    num_black += 1
+            if num_black == 5:
+                black_five += 1
+
+        for possible_row_seq in possible_row_seqs:
+            num_black = 0
+            for coordinate in possible_row_seq:
+                if board[coordinate] == 1:
+                    num_black += 1
+            if num_black == 5:
+                black_five += 1
+
+        
+        #continue with white
+        possible_col_seqs = []
+        possible_row_seqs = []
+
+        for white in self.whites:
+            row_num = white[0]
+            col_num = white[1]
+            
+            #look for possible row, col, and diag sequence of 5 stones
+            possible_col_coordinates = []
+            possible_row_coordinates = []
+            for x in range(0, BOARD_SIZE):
+                if abs(x - row_num) <= 5:
+                    possible_col_coordinates.append((x, col_num))
+                if abs(x - col_num) <= 5:
+                    possible_row_coordinates.append((row_num, x))
+            
+            while len(possible_col_coordinates) >= 5:
+                possible_col_seqs.append(possible_col_coordinates[0:5])
+                possible_col_coordinates.pop(0)
+
+            while len(possible_row_coordinates) >= 5:
+                possible_row_seqs.append(possible_row_coordinates[0:5])
+                possible_row_coordinates.pop(0)
+            
+        #remove duplicate sequences
+        possible_col_seqs.sort()
+        possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
+        possible_row_seqs.sort()
+        possible_row_seqs = list(possible_row_seqs for possible_row_seqs,_ in itertools.groupby(possible_row_seqs))
+
+        #count how many 5 in a row, seq, or diag
+        for possible_col_seq in possible_col_seqs:
+            num_white = 0
+            for coordinate in possible_col_seq:
+                if board[coordinate] == 2:
+                    num_white += 1
+            if num_white == 5:
+                white_five += 1
+
+        for possible_row_seq in possible_row_seqs:
+            num_white = 0
+            for coordinate in possible_row_seq:
+                if board[coordinate] == 2:
+                    num_white += 1
+            if num_white == 5:
+                white_five += 1
+
+
+        #if we have 5 stones of either black or white?        
+        if black_five > 0:
+            self.gameStatus = 1
+            return True
+
+        if white_five > 0:
+            self.gameStatus = 2
+            return True
+
+        return False
+                
     
     def best_move(self) -> tuple:
         """Return the agent's next move"""
@@ -48,8 +191,8 @@ class Gomoku:
     
 
     def get_possible_moves(self) -> List["Gomoku"]:
-        """Find the neighbors of all filled cells as all possible moves next,
-            Return the child Gomoku objects with as if each neighbor is filled
+        """Find the neighbors of all filled cells as all next possible moves,
+            Return a list of child Gomoku objects with each neighbor is filled
         """
         lst = []
 
@@ -84,120 +227,106 @@ class Gomoku:
                 
         return lst
 
-            
-
+    def minimax(self, maximizing: bool, node: "Gomoku") -> int:
+        """Return the score of min or max depending on the perspective"""
     
+        #black 5 in a row +10000000
+        #black open 4 in a row +999999
+        #black half 4 in a row +400000
+        if self.is_terminal() or self.curr_depth > 5:
 
-def get_threat_patterns(board) -> List[int]:
+            #[black_open_four, black_half_four] = self.countPatterens(self.state, 1, 4)
+            #[black_open_three, black_half_three] = self.countPatterens(self.state, 1, 3)
+            [black_open_four, black_half_four] = self.get_threat_patterns(self.state)
 
-    blacks = []
-    whites = []
+            return black_open_four * 4800 + black_half_four * 500
 
-    for (key, value) in board.items():
-        if value == 1:
-            blacks.append(key)
+            
+        scores = []
+        for move in self.get_possible_moves():
+            scores.append(self.minimax(not maximizing, move))
+
+        if maximizing:
+            return max(scores)
         else:
-            whites.append(key)
-
-    black_half_two = 0
-    black_half_three = 0
-    black_half_four = 0
-    black_open_two = 0
-    black_open_three = 0
-    black_open_four = 0
-    
-    white_half_two = 0
-    white_half_three = 0
-    white_half_four = 0
-    white_open_two = 0
-    white_open_three = 0
-    white_open_four = 0
-
-    possible_col_seqs = []
-
-    for black in blacks:
-        row_num = black[0]
-        col_num = black[1]
+            return min(scores)
         
-        possible_col_coordinate = []
-        for x in range(0, BOARD_SIZE):
-            if abs(x - row_num) <= 4:
-                possible_col_coordinate.append((x, col_num))
-        
-        while len(possible_col_coordinate) >= 4:
-            possible_col_seqs.append(possible_col_coordinate[0:4])
-            possible_col_coordinate.pop(0)
-        
-    #remove duplicate sequences
-    possible_col_seqs.sort()
-    possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
 
-    for possible_col_seq in possible_col_seqs:
-        num_black = 0
-        for coordinate in possible_col_seq:
-            if board[coordinate] == 1:
-                num_black += 1
-        if num_black == 4:
-            head = possible_col_seq[0]
-            tail = possible_col_seq[-1]
+    def get_threat_patterns(self) -> List[int]:
 
-            if head[0] != 0 and tail[0] != BOARD_SIZE-1:
-                if board[(head[0]-1, head[1])] == 0 and board[(tail[0]+1, head[1])] == 0:
-                    black_open_four += 1
+        board = self.state
+
+        black_half_two = 0
+        black_half_three = 0
+        black_half_four = 0
+        black_open_two = 0
+        black_open_three = 0
+        black_open_four = 0
+        
+        white_half_two = 0
+        white_half_three = 0
+        white_half_four = 0
+        white_open_two = 0
+        white_open_three = 0
+        white_open_four = 0
+
+        possible_col_seqs = []
+
+        for black in self.blacks:
+            row_num = black[0]
+            col_num = black[1]
             
-            if head[0] == 0:
-                if board[tail[0]+1, head[1]] == 0:
-                    black_half_four += 1
-            elif tail[0] == BOARD_SIZE-1:
-                if board[head[0]-1, head[1]] == 0:
-                    black_half_four += 1
-            else:
-                num_block = 0
-                if board[(head[0]-1, head[1])] == 2: 
-                    num_block += 1
-                if board[(tail[0]+1, head[1])] == 2:
-                    num_block += 1
+            possible_col_coordinate = []
+            for x in range(0, BOARD_SIZE):
+                if abs(x - row_num) <= 4:
+                    possible_col_coordinate.append((x, col_num))
+            
+            while len(possible_col_coordinate) >= 4:
+                possible_col_seqs.append(possible_col_coordinate[0:4])
+                possible_col_coordinate.pop(0)
+        
+        #remove duplicate sequences
+        possible_col_seqs.sort()
+        possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
+
+        for possible_col_seq in possible_col_seqs:
+            num_black = 0
+            for coordinate in possible_col_seq:
+                if board[coordinate] == 1:
+                    num_black += 1
+            if num_black == 4:
+                head = possible_col_seq[0]
+                tail = possible_col_seq[-1]
+
+                if head[0] != 0 and tail[0] != BOARD_SIZE-1:
+                    if board[(head[0]-1, head[1])] == 0 and board[(tail[0]+1, head[1])] == 0:
+                        black_open_four += 1
                 
-                if num_block == 1:
-                    black_half_four += 1
+                if head[0] == 0:
+                    if board[tail[0]+1, head[1]] == 0:
+                        black_half_four += 1
+                elif tail[0] == BOARD_SIZE-1:
+                    if board[head[0]-1, head[1]] == 0:
+                        black_half_four += 1
+                else:
+                    num_block = 0
+                    if board[(head[0]-1, head[1])] == 2: 
+                        num_block += 1
+                    if board[(tail[0]+1, head[1])] == 2:
+                        num_block += 1
+                    
+                    if num_block == 1:
+                        black_half_four += 1
+        
+        return [black_open_four, black_half_four]
+
     
-    return [black_open_four, black_half_four]
 
 
-def minimax(node: Gomoku) -> int:
-    """Compute manhattan distance f(node), i.e., g(node) + h(node)"""
 
-    pass
+
+
 
 if __name__ == "__main__":
 
-    # You should not need to modify any of this code
-    parser = argparse.ArgumentParser(
-        description="Run search algorithms in random inputs"
-    )
-    parser.add_argument(
-        "-a",
-        "--algo",
-        default="bfs",
-        help="Algorithm (one of bfs, astar, astar_custom)",
-    )
-    parser.add_argument(
-        "-i",
-        "--iter",
-        type=int,
-        default=1000,
-        help="Number of iterations",
-    )
-    parser.add_argument(
-        "-s",
-        "--state",
-        type=str,
-        default=None,
-        help="Execute a single iteration using this board configuration specified as a string, e.g., 123456780",
-    )
-
-    args = parser.parse_args()
-
-    num_solutions = 0
-    num_cost = 0
-    num_nodes = 0
+    pass

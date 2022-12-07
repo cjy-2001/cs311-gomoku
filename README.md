@@ -20,10 +20,10 @@ Several sample codes are available as references for our project, in which the g
 
 ## Unit testing
 
-To assist you during development, a unit test suite is provided in `project_test.py`. These tests are a subset of the tests run by Gradescope. You can run the tests by executing the `project_test.py` file as a program, e.g. `python3 project_test.py`
+You can run the tests by executing the `project_test.py` file as a program, e.g. `python3 project_test.py`
 
 ```
-$ python3 search_test.py
+$ python3 project_test.py
 .........
 ----------------------------------------------------------------------
 Ran 9 tests in 0.068s
