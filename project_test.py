@@ -105,7 +105,7 @@ class Tests(unittest.TestCase):
 
         gomoku = project.Gomoku(state=INITIAL_BOARD)
 
-        self.assertEqual(gomoku.get_threat_patterns(), [1,0])
+        self.assertEqual(gomoku.get_threat_patterns(color=1, length=4), (1,0))
 
     
     def test_possible_moves(self):

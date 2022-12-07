@@ -333,7 +333,7 @@ class Gomoku:
 
         return False
 
-    def get_threat_patterns(self, color: int, len: int) -> tuple(int, int):
+    def get_threat_patterns(self, color: int, length: int) -> tuple([int, int]):
         """Return the numbers of open and  half open consecutive stones - threat patterns - in a tuple given a player and a pattern size.
          
          Open threat pattern: patterns without opponent stones on both sides
@@ -371,16 +371,16 @@ class Gomoku:
             possible_diag2_coordinates = []
 
             for x in range(0, BOARD_SIZE):
-                if abs(x - row_num) <= len:
+                if abs(x - row_num) <= length:
                     possible_col_coordinates.append((x, col_num))
-                if abs(x - col_num) <= 5:
+                if abs(x - col_num) <= length:
                     possible_row_coordinates.append((row_num, x))
             
-            while len(possible_col_coordinates) >= len:
-                possible_col_seqs.append(possible_col_coordinates[0:len])
+            while len(possible_col_coordinates) >= length:
+                possible_col_seqs.append(possible_col_coordinates[0:length])
                 possible_col_coordinates.pop(0)
-            while len(possible_row_coordinates) >= len:
-                possible_row_seqs.append(possible_row_coordinates[0:len])
+            while len(possible_row_coordinates) >= length:
+                possible_row_seqs.append(possible_row_coordinates[0:length])
                 possible_row_coordinates.pop(0)
         
         #remove duplicate sequences
@@ -395,7 +395,7 @@ class Gomoku:
             for coordinate in possible_col_seq:
                 if board[coordinate] == 1:
                     num_black += 1
-            if num_black == len:
+            if num_black == length:
                 head = possible_col_seq[0]
                 tail = possible_col_seq[-1]
 
@@ -419,7 +419,7 @@ class Gomoku:
                     if num_block == 1:
                         half += 1
         
-        return tuple(open, half)      
+        return (open, half)
     
     def best_move(self) -> tuple:
         """Return the agent's next move"""
