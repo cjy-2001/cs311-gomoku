@@ -29,15 +29,18 @@ class Gomoku:
         """Create Node to track particular state and associated parent and cost
 
         Args:
-            state (Sequence[int]): State for this node, typically a list, e.g. [0, 1, 2, 3, 4, 5, 6, 7, 8]
-            parent (Node, optional): Parent node, None indicates the root node. Defaults to None.
-            cost (int, optional): Cost in moves to reach this node. Defaults to 0.
+
+            state (dict[(int, int): int]): current distribution of stones on the board; 
+                                            key as the coordinate (row, col) of the cell and value as the stone (0-empty, 1-black, 2-white);
+                                            all values are initialized as 0's
+            parent: parent Gomoku, None indicates the root node. Defaults to None.
+            score:(int) score indicating optimality as the result of the evaluation function
+            gameStatus: (int or string)  = 1 if black wins, = 2 if white wins, = 0 if a draw, otherwise "game_on"
+            curr_depth: depth of the Gomoku node in the expectiminimax tree
         """
         self.state = state  # To facilitate "hashable" make state immutable
         self.parent = parent
         self.score = score
-        # Black stone: 1; White stone: 2
-        # = 1 if black wins, = 2 if white wins, = 0 if a draw, otherwise "game_on"
         self.gameStatus = "game_on" 
         self.curr_depth = moves
 
@@ -90,9 +93,9 @@ class Gomoku:
 
             # Coordinates in the same row or the same column
             for x in range(0, BOARD_SIZE):
-                if abs(x - row_num) <= 5:
+                if abs(x - row_num) < 5:
                     possible_col_coordinates.append((x, col_num))
-                if abs(x - col_num) <= 5:
+                if abs(x - col_num) < 5:
                     possible_row_coordinates.append((row_num, x))
 
             # Append the sequence if the coordinates make five-in-a-row or five-in-a-column
@@ -149,17 +152,23 @@ class Gomoku:
                 possible_diag2_seqs.append(possible_diag2_coordinates[0:5])
                 possible_diag2_coordinates.pop(0)
 
-            
+        # print(possible_col_seqs)
             
         # Remove duplicate sequences
         possible_col_seqs.sort()
         possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
         possible_row_seqs.sort()
         possible_row_seqs = list(possible_row_seqs for possible_row_seqs,_ in itertools.groupby(possible_row_seqs))
-        possible_diag1_seqs.sort()
-        possible_diag1_seqs = list(possible_diag1_seqs for possible_diag1_seqs,_ in itertools.groupby(possible_diag1_seqs))
-        possible_diag2_seqs.sort()
-        possible_diag2_seqs = list(possible_diag2_seqs for possible_diag2_seqs,_ in itertools.groupby(possible_diag2_seqs))
+        # possible_diag2_seqs.sort()
+        # possible_diag2_seqs = list(possible_diag2_seqs for possible_diag2_seqs,_ in itertools.groupby(possible_diag2_seqs))
+        # possible_diag1_seqs.sort()
+        # possible_diag1_seqs = list(possible_diag1_seqs for possible_diag1_seqs,_ in itertools.groupby(possible_diag1_seqs))
+        possible_diag1_seqs_set = set(tuple(x) for x in possible_diag1_seqs)
+        possible_diag1_seqs = [ list(x) for x in possible_diag1_seqs_set ]
+        possible_diag2_seqs_set = set(tuple(x) for x in possible_diag2_seqs)
+        possible_diag2_seqs = [ list(x) for x in possible_diag2_seqs_set ]
+        
+        # print(possible_col_seqs)
 
         # Count how many 5 consecutive coordinates - sequences -  in a row, col, or diag
         for possible_col_seq in possible_col_seqs:
@@ -178,7 +187,7 @@ class Gomoku:
             if num_black == 5:
                 black_five += 1
         
-        # print(possible_diag1_seqs)
+        #print(possible_diag1_seqs)
         for possible_diag1_seq in possible_diag1_seqs:
             num_black = 0
             for coordinate in possible_diag1_seq:
@@ -276,10 +285,14 @@ class Gomoku:
         possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
         possible_row_seqs.sort()
         possible_row_seqs = list(possible_row_seqs for possible_row_seqs,_ in itertools.groupby(possible_row_seqs))
-        possible_diag1_seqs.sort()
-        possible_diag1_seqs = list(possible_diag1_seqs for possible_diag1_seqs,_ in itertools.groupby(possible_diag1_seqs))
-        possible_diag2_seqs.sort()
-        possible_diag2_seqs = list(possible_diag2_seqs for possible_diag2_seqs,_ in itertools.groupby(possible_diag2_seqs))
+        # possible_diag2_seqs.sort()
+        # possible_diag2_seqs = list(possible_diag2_seqs for possible_diag2_seqs,_ in itertools.groupby(possible_diag2_seqs))
+        # possible_diag1_seqs.sort()
+        # possible_diag1_seqs = list(possible_diag1_seqs for possible_diag1_seqs,_ in itertools.groupby(possible_diag1_seqs))
+        possible_diag1_seqs_set = set(tuple(x) for x in possible_diag1_seqs)
+        possible_diag1_seqs = [ list(x) for x in possible_diag1_seqs_set ]
+        possible_diag2_seqs_set = set(tuple(x) for x in possible_diag2_seqs)
+        possible_diag2_seqs = [ list(x) for x in possible_diag2_seqs_set ]
 
         #count how many 5 in a row, seq, or diag
         for possible_col_seq in possible_col_seqs:
@@ -368,11 +381,12 @@ class Gomoku:
             possible_diag2_coordinates = []
 
             for x in range(0, BOARD_SIZE):
-                if abs(x - row_num) <= length:
+                if abs(x - row_num) < length:
                     possible_col_coordinates.append((x, col_num))
-                if abs(x - col_num) <= length:
+                if abs(x - col_num) < length:
                     possible_row_coordinates.append((row_num, x))
             
+            # print(possible_row_coordinates)
             while len(possible_col_coordinates) >= length:
                 possible_col_seqs.append(possible_col_coordinates[0:length])
                 possible_col_coordinates.pop(0)
@@ -380,6 +394,7 @@ class Gomoku:
                 possible_row_seqs.append(possible_row_coordinates[0:length])
                 possible_row_coordinates.pop(0)
 
+            # print(possible_row_seqs)
 
             # Coordinates in the diagonal 1
             # Upper-left corner coordinates
@@ -403,6 +418,29 @@ class Gomoku:
                 possible_diag1_seqs.append(possible_diag1_coordinates[0:length])
                 possible_diag1_coordinates.pop(0)
 
+
+            # Coordinates in the diagonal 2
+            # Upper-right corner coordinates
+            row_index = row_num
+            col_index = col_num
+            while (row_index > -1) and (col_index < BOARD_SIZE):
+                possible_diag2_coordinates.insert(0, (row_index, col_index))
+                row_index -= 1
+                col_index += 1
+            
+            # Lower-left corner coordinates
+            row_index = row_num
+            col_index = col_num
+            while (row_index + 1 < BOARD_SIZE) and (col_index + 1 > -1) and (col_index + 1 < BOARD_SIZE):
+                possible_diag2_coordinates.append((row_index + 1, col_index + 1))
+                row_index += 1
+                col_index -= 1
+            
+            # Append the sequence if the coordinates make five-in-a-diagonal
+            while len(possible_diag2_coordinates) >= length:
+                possible_diag2_seqs.append(possible_diag2_coordinates[0:length])
+                possible_diag2_coordinates.pop(0)
+
         
         #remove duplicate sequences
         possible_col_seqs.sort()
@@ -410,8 +448,16 @@ class Gomoku:
         possible_row_seqs.sort()
         possible_row_seqs = list(possible_row_seqs for possible_row_seqs,_ in itertools.groupby(possible_row_seqs))
         possible_diag1_seqs.sort()
-        possible_diag1_seqs = list(possible_diag1_seqs for possible_diag1_seqs,_ in itertools.groupby(possible_diag1_seqs))
+        # possible_diag2_seqs.sort()
+        # possible_diag2_seqs = list(possible_diag2_seqs for possible_diag2_seqs,_ in itertools.groupby(possible_diag2_seqs))
+        # possible_diag1_seqs.sort()
+        # possible_diag1_seqs = list(possible_diag1_seqs for possible_diag1_seqs,_ in itertools.groupby(possible_diag1_seqs))
+        possible_diag1_seqs_set = set(tuple(x) for x in possible_diag1_seqs)
+        possible_diag1_seqs = [ list(x) for x in possible_diag1_seqs_set ]
+        possible_diag2_seqs_set = set(tuple(x) for x in possible_diag2_seqs)
+        possible_diag2_seqs = [ list(x) for x in possible_diag2_seqs_set ]
 
+        
         #start to count
         #col
         for possible_col_seq in possible_col_seqs:
@@ -426,6 +472,7 @@ class Gomoku:
                 if head[0] != 0 and tail[0] != BOARD_SIZE-1:
                     if board[(head[0]-1, head[1])] == 0 and board[(tail[0]+1, head[1])] == 0:
                         open += 1
+                        print(possible_col_seq)
                 
                 if head[0] == 0:
                     if board[tail[0]+1, head[1]] == 0:
@@ -434,14 +481,12 @@ class Gomoku:
                     if board[head[0]-1, head[1]] == 0:
                         half += 1
                 else:
-                    num_block = 0
                     if board[(head[0]-1, head[1])] == opponent: 
-                        num_block += 1
+                        if board[(tail[0]+1, head[1])] == 0:
+                            half += 1
                     if board[(tail[0]+1, head[1])] == opponent:
-                        num_block += 1
-                    
-                    if num_block == 1:
-                        half += 1
+                        if board[(head[0]-1, head[1])] == 0:
+                            half += 1
         
         #row
         for possible_row_seq in possible_row_seqs:
@@ -456,6 +501,7 @@ class Gomoku:
                 if head[1] != 0 and tail[1] != BOARD_SIZE-1:
                     if board[(head[0], head[1]-1)] == 0 and board[(head[0], tail[1]+1)] == 0:
                         open += 1
+                        # print(possible_row_seq)
                 
                 if head[1] == 0:
                     if board[head[0], tail[1]+1] == 0:
@@ -464,47 +510,75 @@ class Gomoku:
                     if board[head[0], head[1]-1] == 0:
                         half += 1
                 else:
-                    num_block = 0
                     if board[(head[0], head[1]-1)] == opponent: 
-                        num_block += 1
-                    if board[(head[0], tail[1]+1)] == opponent:
-                        num_block += 1
-                    
-                    if num_block == 1:
-                        half += 1
+                        if board[(head[0], tail[1]+1)] == 0:
+                            half += 1
+                            # print(possible_row_seq)
 
-        #diag1
-        for possible_diag1_seq in possible_diag1_seqs:
+                    if board[(head[0], tail[1]+1)] == opponent:
+                        if board[(head[0], head[1]-1)] == 0:
+                            half += 1
+                            print(possible_row_seq)
+
+        # #diag1
+        # for possible_diag1_seq in possible_diag1_seqs:
+        #     num_stone = 0
+        #     for coordinate in possible_diag1_seq:
+        #         if board[coordinate] == color:
+        #             num_stone += 1
+        #     if num_stone == length:
+        #         head = possible_diag1_seq[0]
+        #         tail = possible_diag1_seq[-1]
+
+        #         if head[0] != 0 and head[1] != 0 and tail[0] != BOARD_SIZE-1 and tail[1] != BOARD_SIZE-1:
+        #             if board[(head[0]-1, head[1]-1)] == 0 and board[(tail[0]+1, tail[1]+1)] == 0:
+        #                 open += 1
+
+        #         if (head[0] == 0 or head[1] == 0) and (tail[0] != BOARD_SIZE-1 and tail[1] != BOARD_SIZE-1):
+        #             if board[tail[0]+1, tail[1]+1] == 0:
+        #                 half += 1
+        #         elif (tail[0] == BOARD_SIZE-1 or tail[1] == BOARD_SIZE-1) and (head[0] != 0 and head[1] != 0):
+        #             if board[head[0]-1, head[1]-1] == 0:
+        #                 half += 1
+        #         else:
+        #             if head[0] != 0 and head[1] != 0 and tail[0] != BOARD_SIZE-1 and tail[1] != BOARD_SIZE-1:
+        #                 if board[(head[0]-1, head[1]+1)] == opponent: 
+        #                     if board[(tail[0]+1, tail[1]-1)] == 0:
+        #                         half += 1
+        #                 if board[(tail[0]+1, tail[1]-1)] == opponent:
+        #                     if board[(head[0]-1, head[1]+1)] == 0:
+        #                         half += 1
+                    
+
+
+        #diag2
+        for possible_diag2_seq in possible_diag2_seqs:
             num_stone = 0
-            for coordinate in possible_diag1_seq:
+            for coordinate in possible_diag2_seq:
                 if board[coordinate] == color:
                     num_stone += 1
             if num_stone == length:
-                head = possible_row_seq[0]
-                tail = possible_row_seq[-1]
+                head = possible_diag2_seq[0]
+                tail = possible_diag2_seq[-1]
 
-                if head[1] != 0 and tail[1] != BOARD_SIZE-1:
-                    if board[(head[0], head[1]-1)] == 0 and board[(head[0], tail[1]+1)] == 0:
+                if head[0] != 0 and head[1] != BOARD_SIZE-1 and tail[0] != BOARD_SIZE-1 and tail[1] != 0:
+                    if board[(head[0]-1, head[1]+1)] == 0 and board[(tail[0]+1, tail[1]-1)] == 0:
                         open += 1
-                
-                if head[1] == 0:
-                    if board[head[0], tail[1]+1] == 0:
+
+                if (head[0] == 0 or head[1] == BOARD_SIZE-1) and (tail[0] != BOARD_SIZE-1 and tail[1] != 0):
+                    if board[tail[0]+1, tail[1]-1] == 0:
                         half += 1
-                elif tail[1] == BOARD_SIZE-1:
-                    if board[head[0], head[1]-1] == 0:
+                elif (tail[0] == BOARD_SIZE-1 or tail[1] == 0) and (head[0] != 0 and head[1] != BOARD_SIZE-1):
+                    if board[head[0]-1, head[1]+1] == 0:
                         half += 1
                 else:
-                    num_block = 0
-                    if board[(head[0], head[1]-1)] == opponent: 
-                        num_block += 1
-                    if board[(head[0], tail[1]+1)] == opponent:
-                        num_block += 1
-                    
-                    if num_block == 1:
-                        half += 1
-
-        #diag2
-
+                    if head[0] != 0 and head[1] != BOARD_SIZE-1 and tail[0] != BOARD_SIZE-1 and tail[1] != 0:
+                        if board[(head[0]-1, head[1]-1)] == opponent: 
+                            if board[(tail[0]+1, tail[1]+1)] == 0:
+                                half += 1
+                        if board[(tail[0]+1, tail[1]+1)] == opponent:
+                            if board[(head[0]-1, head[1]-1)] == 0:
+                                half += 1
 
         
         return open, half
