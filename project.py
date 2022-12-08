@@ -99,13 +99,12 @@ class Gomoku:
             while len(possible_col_coordinates) >= 5:
                 possible_col_seqs.append(possible_col_coordinates[0:5])
                 possible_col_coordinates.pop(0)
-
             while len(possible_row_coordinates) >= 5:
                 possible_row_seqs.append(possible_row_coordinates[0:5])
                 possible_row_coordinates.pop(0)
 
 
-            # Coordinates in the same diagonal
+            # Coordinates in the diagonal 1
             # Upper-left corner coordinates
             row_index = row_num
             col_index = col_num
@@ -117,20 +116,18 @@ class Gomoku:
             # Lower-right corner coordinates
             row_index = row_num
             col_index = col_num
-
-
             while (row_index + 1 < BOARD_SIZE) and (col_index + 1 < BOARD_SIZE):
                 possible_diag1_coordinates.append((row_index + 1, col_index + 1))
                 row_index += 1
                 col_index += 1
             
             # Append the sequence if the coordinates make five-in-a-diagonal
-
             while len(possible_diag1_coordinates) >= 5:
                 possible_diag1_seqs.append(possible_diag1_coordinates[0:5])
                 possible_diag1_coordinates.pop(0)
 
             
+            # Coordinates in the diagonal 2
             # Upper-right corner coordinates
             row_index = row_num
             col_index = col_num
@@ -142,12 +139,12 @@ class Gomoku:
             # Lower-left corner coordinates
             row_index = row_num
             col_index = col_num
-
             while (row_index + 1 < BOARD_SIZE) and (col_index + 1 > -1) and (col_index + 1 < BOARD_SIZE):
                 possible_diag2_coordinates.append((row_index + 1, col_index + 1))
                 row_index += 1
                 col_index -= 1
             
+            # Append the sequence if the coordinates make five-in-a-diagonal
             while len(possible_diag2_coordinates) >= 5:
                 possible_diag2_seqs.append(possible_diag2_coordinates[0:5])
                 possible_diag2_coordinates.pop(0)
@@ -382,20 +379,47 @@ class Gomoku:
             while len(possible_row_coordinates) >= length:
                 possible_row_seqs.append(possible_row_coordinates[0:length])
                 possible_row_coordinates.pop(0)
+
+
+            # Coordinates in the diagonal 1
+            # Upper-left corner coordinates
+            row_index = row_num
+            col_index = col_num
+            while (row_index > -1) and (col_index > -1):
+                possible_diag1_coordinates.insert(0, (row_index, col_index))
+                row_index -= 1
+                col_index -= 1
+            
+            # Lower-right corner coordinates
+            row_index = row_num
+            col_index = col_num
+            while (row_index + 1 < BOARD_SIZE) and (col_index + 1 < BOARD_SIZE):
+                possible_diag1_coordinates.append((row_index + 1, col_index + 1))
+                row_index += 1
+                col_index += 1
+            
+            # Append the sequence if the coordinates make five-in-a-diagonal
+            while len(possible_diag1_coordinates) >= length:
+                possible_diag1_seqs.append(possible_diag1_coordinates[0:length])
+                possible_diag1_coordinates.pop(0)
+
         
         #remove duplicate sequences
         possible_col_seqs.sort()
         possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
         possible_row_seqs.sort()
         possible_row_seqs = list(possible_row_seqs for possible_row_seqs,_ in itertools.groupby(possible_row_seqs))
+        possible_diag1_seqs.sort()
+        possible_diag1_seqs = list(possible_diag1_seqs for possible_diag1_seqs,_ in itertools.groupby(possible_diag1_seqs))
 
         #start to count
+        #col
         for possible_col_seq in possible_col_seqs:
-            num_black = 0
+            num_stone = 0
             for coordinate in possible_col_seq:
-                if board[coordinate] == 1:
-                    num_black += 1
-            if num_black == length:
+                if board[coordinate] == color:
+                    num_stone += 1
+            if num_stone == length:
                 head = possible_col_seq[0]
                 tail = possible_col_seq[-1]
 
@@ -419,7 +443,71 @@ class Gomoku:
                     if num_block == 1:
                         half += 1
         
-        return (open, half)
+        #row
+        for possible_row_seq in possible_row_seqs:
+            num_stone = 0
+            for coordinate in possible_row_seq:
+                if board[coordinate] == color:
+                    num_stone += 1
+            if num_stone == length:
+                head = possible_row_seq[0]
+                tail = possible_row_seq[-1]
+
+                if head[1] != 0 and tail[1] != BOARD_SIZE-1:
+                    if board[(head[0], head[1]-1)] == 0 and board[(head[0], tail[1]+1)] == 0:
+                        open += 1
+                
+                if head[1] == 0:
+                    if board[head[0], tail[1]+1] == 0:
+                        half += 1
+                elif tail[1] == BOARD_SIZE-1:
+                    if board[head[0], head[1]-1] == 0:
+                        half += 1
+                else:
+                    num_block = 0
+                    if board[(head[0], head[1]-1)] == opponent: 
+                        num_block += 1
+                    if board[(head[0], tail[1]+1)] == opponent:
+                        num_block += 1
+                    
+                    if num_block == 1:
+                        half += 1
+
+        #diag1
+        for possible_diag1_seq in possible_diag1_seqs:
+            num_stone = 0
+            for coordinate in possible_diag1_seq:
+                if board[coordinate] == color:
+                    num_stone += 1
+            if num_stone == length:
+                head = possible_row_seq[0]
+                tail = possible_row_seq[-1]
+
+                if head[1] != 0 and tail[1] != BOARD_SIZE-1:
+                    if board[(head[0], head[1]-1)] == 0 and board[(head[0], tail[1]+1)] == 0:
+                        open += 1
+                
+                if head[1] == 0:
+                    if board[head[0], tail[1]+1] == 0:
+                        half += 1
+                elif tail[1] == BOARD_SIZE-1:
+                    if board[head[0], head[1]-1] == 0:
+                        half += 1
+                else:
+                    num_block = 0
+                    if board[(head[0], head[1]-1)] == opponent: 
+                        num_block += 1
+                    if board[(head[0], tail[1]+1)] == opponent:
+                        num_block += 1
+                    
+                    if num_block == 1:
+                        half += 1
+
+        #diag2
+
+
+        
+        return open, half
     
     def best_move(self) -> tuple:
         """Return the agent's next move"""
@@ -470,10 +558,21 @@ class Gomoku:
         #black open 4 in a row +999999
         #black half 4 in a row +400000
         if self.is_terminal() or self.curr_depth > 5:
+            
+            #count black patterns
+            [black_open_two, black_half_two] = self.get_threat_patterns(color=1, length=2)
+            [black_open_three, black_half_three] = self.get_threat_patterns(color=1, length=3)
+            [black_open_four, black_half_four] = self.get_threat_patterns(color=1, length=4)
+            [black_open_five, black_half_five] = self.get_threat_patterns(color=1, length=5)
+            black_five = black_open_five + black_half_five
 
-            #[black_open_four, black_half_four] = self.countPatterens(self.state, 1, 4)
-            #[black_open_three, black_half_three] = self.countPatterens(self.state, 1, 3)
-            [black_open_four, black_half_four] = self.get_threat_patterns(self.state)
+
+            #count white patterns
+            [white_open_two, white_half_two] = self.get_threat_patterns(color=2, length=2)
+            [white_open_three, white_half_three] = self.get_threat_patterns(color=2, length=3)
+            [white_open_four, white_half_four] = self.get_threat_patterns(color=2, length=4)
+            [white_open_five, white_half_five] = self.get_threat_patterns(color=2, length=5)
+            white_five = white_open_five + white_half_five
 
             return black_open_four * 4800 + black_half_four * 500
 
