@@ -25,7 +25,7 @@ INITIAL_BOARD[4, 3] = 1
 INITIAL_BOARD[5, 3] = 1
 
 class Gomoku:
-    def __init__(self, state: dict[(int, int): int], parent: "Gomoku" = None, score=0, moves=0):
+    def __init__(self, state: dict[(int, int): int], parent: "Gomoku" = None, score=0, curr_depth=0):
         """Create Node to track particular state and associated parent and cost
 
         Args:
@@ -42,7 +42,7 @@ class Gomoku:
         self.parent = parent
         self.score = score
         self.gameStatus = "game_on" 
-        self.curr_depth = moves
+        self.curr_depth = curr_depth
 
         # get coordinates of all black and white stones
         blacks = []
@@ -598,6 +598,8 @@ class Gomoku:
 
         filled = [x for x in self.state if self.state[x] > 0]
 
+        #print(filled)
+
         move_coordinates = set()
         
         
@@ -616,14 +618,15 @@ class Gomoku:
                 if n[0] < 0 or n[1] < 0 or n[0] > BOARD_SIZE - 1 or n[1] > BOARD_SIZE - 1 :
                     continue
                 move_coordinates.add(n)
-            # print(move_coordinates)
-                
             
+                
+        #print(move_coordinates)
+
         for m in move_coordinates:
             state_copy = self.state
             if self.state[m] == 0:
                 state_copy[m] = 1
-                lst.append(Gomoku(state=state_copy, parent=self.state, score=self.score))
+                lst.append(Gomoku(state=state_copy, parent=self.state, curr_depth=self.curr_depth+1))
                 
         return lst
 
@@ -661,10 +664,10 @@ class Gomoku:
             500 * three_open_diff + 200 * three_half_diff + 
             50 * two_open_diff + 10 * two_half_diff)
 
-            
+        # print(len(self.get_possible_moves()))
         scores = []
-        for move in self.get_possible_moves():
-            scores.append(move.minimax(not maximizing))
+        for board in self.get_possible_moves():
+            scores.append(board.minimax(not maximizing))
 
         if maximizing:
             return max(scores)
