@@ -276,7 +276,7 @@ class Gomoku:
                 possible_diag2_seqs.append(possible_diag2_coordinates[0:5])
                 possible_diag2_coordinates.pop(0)
             
-        #remove duplicate sequences
+        # Remove duplicate sequences
         possible_col_seqs.sort()
         possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
         possible_row_seqs.sort()
@@ -287,7 +287,7 @@ class Gomoku:
         possible_diag2_seqs = [ list(x) for x in possible_diag2_seqs_set ]
 
 
-        #count how many 5 in a row, seq, or diag
+        # Count how many 5 in a row, seq, or diag
         for possible_col_seq in possible_col_seqs:
             num_white = 0
             for coordinate in possible_col_seq:
@@ -623,16 +623,13 @@ class Gomoku:
             state_copy = self.state
             if self.state[m] == 0:
                 state_copy[m] = 1
-                lst.append(Gomoku(state_copy, self.state,self.score))
+                lst.append(Gomoku(state=state_copy, parent=self.state, score=self.score))
                 
         return lst
 
-    def minimax(self, maximizing: bool, node: "Gomoku") -> int:
+    def minimax(self, maximizing: bool) -> int:
         """Return the score of min or max depending on the perspective"""
     
-        #black 5 in a row +10000000
-        #black open 4 in a row +999999
-        #black half 4 in a row +400000
         if self.is_terminal() or self.curr_depth > 5:
             
             #count black patterns
@@ -650,12 +647,24 @@ class Gomoku:
             [white_open_five, white_half_five] = self.get_threat_patterns(color=2, length=5)
             white_five = white_open_five + white_half_five
 
-            return black_open_four * 4800 + black_half_four * 500
+            five_diff = black_five - white_five
+            four_open_diff = black_open_four - white_open_four
+            four_half_diff = black_half_four - white_half_four
+            three_open_diff = black_open_three - white_open_three
+            three_half_diff = black_half_three - white_half_three
+            two_open_diff = black_open_two - white_open_two
+            two_half_diff = black_half_two - white_half_two
+
+
+            return (6000 * five_diff + 
+            4800 * four_open_diff + 500 * four_half_diff + 
+            500 * three_open_diff + 200 * three_half_diff + 
+            50 * two_open_diff + 10 * two_half_diff)
 
             
         scores = []
         for move in self.get_possible_moves():
-            scores.append(self.minimax(not maximizing, move))
+            scores.append(move.minimax(not maximizing))
 
         if maximizing:
             return max(scores)
