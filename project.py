@@ -24,6 +24,15 @@ INITIAL_BOARD[3, 3] = 1
 INITIAL_BOARD[4, 3] = 1
 INITIAL_BOARD[5, 3] = 1
 
+def draw_board(dic, size):
+    lst = list(dic.values())
+    for i in range(len(lst)):
+        if (i+1)% size ==0:
+            print(lst[i])
+        else:
+            print(lst[i], end = " ")
+
+
 class Gomoku:
     def __init__(self, state: dict[(int, int): int], parent: "Gomoku" = None, score=0, curr_depth=0):
         """Create Node to track particular state and associated parent and cost
@@ -44,7 +53,7 @@ class Gomoku:
         self.gameStatus = "game_on" 
         self.curr_depth = curr_depth
 
-        # get coordinates of all black and white stones
+        # store coordinates of all black and white stones
         blacks = []
         whites = []
 
@@ -325,7 +334,6 @@ class Gomoku:
         if black_five > 0:
             self.gameStatus = 1
             return True
-
         if white_five > 0:
             self.gameStatus = 2
             return True
@@ -620,28 +628,35 @@ class Gomoku:
                 move_coordinates.add(n)
             
                 
-        #print(move_coordinates)
+        # print(move_coordinates)
+        # draw_board(self.state, 9)
 
         for m in move_coordinates:
-            state_copy = self.state
+            state_copy = self.state.copy()
+            
             if self.state[m] == 0:
-                state_copy[m] = 1
-                lst.append(Gomoku(state=state_copy, parent=self.state, curr_depth=self.curr_depth+1))
+                if len(self.blacks) > len(self.whites):
+                    state_copy[m] = 2
+                    lst.append(Gomoku(state_copy, self.state, curr_depth=self.curr_depth+1))
+                else:
+                    state_copy[m] = 1
+                    lst.append(Gomoku(state_copy, self.state, curr_depth=self.curr_depth+1))
+
+        # for board in lst:
+        # draw_board(self.state, 9)
                 
         return lst
 
     def minimax(self, maximizing: bool) -> int:
         """Return the score of min or max depending on the perspective"""
-    
-        if self.is_terminal() or self.curr_depth > 5:
-            
+        
+        if self.is_terminal() or self.curr_depth > 1:
             #count black patterns
             [black_open_two, black_half_two] = self.get_threat_patterns(color=1, length=2)
             [black_open_three, black_half_three] = self.get_threat_patterns(color=1, length=3)
             [black_open_four, black_half_four] = self.get_threat_patterns(color=1, length=4)
             [black_open_five, black_half_five] = self.get_threat_patterns(color=1, length=5)
             black_five = black_open_five + black_half_five
-
 
             #count white patterns
             [white_open_two, white_half_two] = self.get_threat_patterns(color=2, length=2)
@@ -658,21 +673,19 @@ class Gomoku:
             two_open_diff = black_open_two - white_open_two
             two_half_diff = black_half_two - white_half_two
 
-
             return (6000 * five_diff + 
             4800 * four_open_diff + 500 * four_half_diff + 
             500 * three_open_diff + 200 * three_half_diff + 
-            50 * two_open_diff + 10 * two_half_diff)
+            50 * two_open_diff + 10 * two_half_diff), self.state
 
-        # print(len(self.get_possible_moves()))
         scores = []
         for board in self.get_possible_moves():
             scores.append(board.minimax(not maximizing))
 
         if maximizing:
-            return max(scores)
+            return max(scores, key=lambda item:item[0])
         else:
-            return min(scores)
+            return min(scores, key=lambda item:item[0])
 
 
 if __name__ == "__main__":

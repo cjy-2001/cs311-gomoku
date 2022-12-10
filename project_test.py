@@ -386,21 +386,36 @@ class Tests(unittest.TestCase):
         # print(gomoku.get_threat_patterns(2, 3))
         # print(gomoku.get_threat_patterns(2, 2))
 
-        print(gomoku.minimax(maximizing=True))
-
-        INITIAL_BOARD = dict.fromkeys(INITIAL_BOARD, 0)
-        INITIAL_BOARD[4, 4] = 0
-        INITIAL_BOARD[3, 3] = 1
-        gomoku = project.Gomoku(state=INITIAL_BOARD)
-        print(gomoku.minimax(maximizing=True))
+        score, board = gomoku.minimax(maximizing=True)
+        print(score)
+        project.draw_board(board, 9)
 
         # INITIAL_BOARD = dict.fromkeys(INITIAL_BOARD, 0)
         # INITIAL_BOARD[4, 4] = 0
+        # INITIAL_BOARD[3, 3] = 1
         # gomoku = project.Gomoku(state=INITIAL_BOARD)
-        # print(gomoku.minimax(maximizing=False))
+        # print(gomoku.minimax(maximizing=True))
 
-        # self.assertEqual(gomoku.get_threat_patterns(color=1, length=2), (0,0))
+        # INITIAL_BOARD = dict.fromkeys(INITIAL_BOARD, 0)
+        # INITIAL_BOARD[3, 4] = 1
+        # INITIAL_BOARD[4, 4] = 2
+        # INITIAL_BOARD[4, 5] = 1
+        # INITIAL_BOARD[4, 6] = 2
+        # INITIAL_BOARD[5, 4] = 1
+        # INITIAL_BOARD[5, 5] = 1
+        # INITIAL_BOARD[6, 4] = 2
+        # INITIAL_BOARD[6, 5] = 2
+        # gomoku = project.Gomoku(state=INITIAL_BOARD)
+        # score, board = gomoku.minimax(maximizing=True)
+        # print(score)
+        # project.draw_board(board, 9)
 
+        # INITIAL_BOARD = dict.fromkeys(INITIAL_BOARD, 0)
+        # INITIAL_BOARD[4, 4] = 1
+        # INITIAL_BOARD[5, 4] = 2
+
+        # gomoku = project.Gomoku(state=INITIAL_BOARD)
+        # print(gomoku.minimax(maximizing=True))
 
 if __name__ == '__main__':
     unittest.main(argv=sys.argv[:1])
