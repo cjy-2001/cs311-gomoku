@@ -5,6 +5,7 @@ stone of their color on a 15x15 empty intersection. The winner is the first whos
  
 Our goal is to design an agent that plays with a human player in real time. We intend to optimize both search efficiency and the chances of winning by implementing a minimax tree model and to explore how pruning or heuristic functions may improve the model performance. Some ways to evaluate the model performance include: if the agent will always win given a mistake firstly made by the human player, the number of steps it takes to beat the opponent, and the duration of each search.
 
+For our final report, please refer to "CS 311 Final Project Poster.pdf".
 
 ## Method
 
@@ -17,7 +18,6 @@ Several sample codes are available as references for our project, in which the g
   0, 0, 0, 0, 0,
   0, 0, 0, 0, 0]
 
-For our final poster, please refer to "CS 311 Final Project Poster.pdf".
 
 ## Unit testing
 
