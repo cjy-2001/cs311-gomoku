@@ -657,6 +657,12 @@ class Gomoku:
             two_open_diff = black_open_two - white_open_two
             two_half_diff = black_half_two - white_half_two
 
+            # Compared with another evaluation function
+            # return (6000 * five_diff + 
+            # 4800 * four_open_diff + 500 * four_half_diff + 
+            # 500 * three_open_diff + 200 * three_half_diff + 
+            # 50 * two_open_diff + 10 * two_half_diff), self.state
+            
             return (10000 * five_diff + 
             5000 * four_open_diff + 2500 * four_half_diff + 
             2000 * three_open_diff + 1000 * three_half_diff + 
