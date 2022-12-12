@@ -17,6 +17,7 @@ Several sample codes are available as references for our project, in which the g
   0, 0, 0, 0, 0,
   0, 0, 0, 0, 0]
 
+For our final poster, please refer to "CS 311 Final Project Poster.pdf".
 
 ## Unit testing
 
