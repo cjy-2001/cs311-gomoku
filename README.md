@@ -1,4 +1,4 @@
-# CS311 Final Project - Gomoku Algorithum
+# CS311 Final Project - Gomoku Algorithm
 
 Gomoku, or five in a row, is an abstract strategy board game where two players place a
 stone of their color on a 15x15 empty intersection. The winner is the first whose stones form an unbroken chain of five horizontally, vertically, or diagonally.

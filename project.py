@@ -5,12 +5,11 @@ Full Name(s): Jiayi Chen, Siyuan Niu
 
 """
 
-import argparse, itertools, random
-from heapq import heapify, heappush, heappop
-from typing import Callable, List, Optional, Sequence, Tuple
+import itertools
+from typing import List, Optional, Sequence, Tuple
 
 
-# Problem constants. 
+# Problem constants
 BOARD_SIZE = 9
 INITIAL_BOARD = {}
 
@@ -19,12 +18,14 @@ for row in range(0, BOARD_SIZE):
         INITIAL_BOARD[(row, col)] = 0
     
 
-INITIAL_BOARD[2, 3] = 1
-INITIAL_BOARD[3, 3] = 1
-INITIAL_BOARD[4, 3] = 1
-INITIAL_BOARD[5, 3] = 1
-
 def draw_board(dic, size):
+    """Helper function to draw the current board
+
+    Args:
+            dic: current board
+            size: size of the bard
+    """
+    
     lst = list(dic.values())
     for i in range(len(lst)):
         if (i+1)% size ==0:
@@ -34,7 +35,7 @@ def draw_board(dic, size):
 
 
 class Gomoku:
-    def __init__(self, state: dict[(int, int): int], parent: "Gomoku" = None, score=0, curr_depth=0):
+    def __init__(self, state: dict[(int, int): int], parent: "Gomoku" = None, curr_depth=0):
         """Create Node to track particular state and associated parent and cost
 
         Args:
@@ -43,17 +44,15 @@ class Gomoku:
                                             key as the coordinate (row, col) of the cell and value as the stone (0-empty, 1-black, 2-white);
                                             all values are initialized as 0's
             parent: parent Gomoku, None indicates the root node. Defaults to None.
-            score:(int) score indicating optimality as the result of the evaluation function
             gameStatus: (int or string)  = 1 if black wins, = 2 if white wins, = 0 if a draw, otherwise "game_on"
             curr_depth: depth of the Gomoku node in the expectiminimax tree
         """
         self.state = state  # To facilitate "hashable" make state immutable
         self.parent = parent
-        self.score = score
         self.gameStatus = "game_on" 
         self.curr_depth = curr_depth
 
-        # store coordinates of all black and white stones
+        # Store coordinates of all black and white stones
         blacks = []
         whites = []
 
@@ -205,6 +204,7 @@ class Gomoku:
         
 
         # Repeat for white as the winner
+        # I realized that there are some duplicate codes here, and I might want to clean it up in the future
         possible_col_seqs = []
         possible_row_seqs = []
         possible_diag1_seqs = []
@@ -344,6 +344,7 @@ class Gomoku:
 
         return False
 
+
     def get_threat_patterns(self, color: int, length: int) -> tuple([int, int]):
         """Return the numbers of open and  half open consecutive stones - threat patterns - in a tuple given a player and a pattern size.
          
@@ -375,7 +376,7 @@ class Gomoku:
             row_num = stone[0]
             col_num = stone[1]
             
-            #look for possible row, col, and diag sequence of 5 stones
+            # Look for possible row, col, and diag sequence of 5 stones
             possible_col_coordinates = []
             possible_row_coordinates = []
             possible_diag1_coordinates = []
@@ -446,7 +447,7 @@ class Gomoku:
                 possible_diag2_coordinates.pop(0)
 
         
-        #remove duplicate sequences
+        # Remove duplicate sequences
         possible_col_seqs.sort()
         possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
         possible_row_seqs.sort()
@@ -458,8 +459,8 @@ class Gomoku:
         possible_diag2_seqs = [ list(x) for x in possible_diag2_seqs_set ]
 
         
-        #start to count
-        #col
+        # Start to count
+        # Col
         for possible_col_seq in possible_col_seqs:
             num_stone = 0
             for coordinate in possible_col_seq:
@@ -490,7 +491,7 @@ class Gomoku:
                             if board[(head[0]-1, head[1])] == 0:
                                 half += 1
         
-        #row
+        # Row
         for possible_row_seq in possible_row_seqs:
             num_stone = 0
             for coordinate in possible_row_seq:
@@ -522,7 +523,7 @@ class Gomoku:
                             if board[(head[0], head[1]-1)] == 0:
                                 half += 1
 
-        #diag1
+        # Diag1
         for possible_diag1_seq in possible_diag1_seqs:
             num_stone = 0
             for coordinate in possible_diag1_seq:
@@ -554,7 +555,7 @@ class Gomoku:
                                 if board[(head[0]-1, head[1]-1)] == 0:
                                     half += 1
                     
-        #diag2
+        # Diag2
         for possible_diag2_seq in possible_diag2_seqs:
             num_stone = 0
             for coordinate in possible_diag2_seq:
@@ -589,13 +590,7 @@ class Gomoku:
                                 if board[(head[0]-1, head[1]+1)] == 0:
                                     half += 1
                                 
-
-        
         return open, half
-    
-    def best_move(self) -> tuple:
-        """Return the agent's next move"""
-        pass 
     
 
     def get_possible_moves(self) -> List["Gomoku"]:
@@ -603,13 +598,9 @@ class Gomoku:
             return a list of child Gomoku objects with each neighbor filled
         """
         lst = []
-
         filled = [x for x in self.state if self.state[x] > 0]
 
-        #print(filled)
-
         move_coordinates = set()
-        
         
         for (row, col) in filled:
             neighbors = [
@@ -626,10 +617,6 @@ class Gomoku:
                 if n[0] < 0 or n[1] < 0 or n[0] > BOARD_SIZE - 1 or n[1] > BOARD_SIZE - 1 :
                     continue
                 move_coordinates.add(n)
-            
-                
-        # print(move_coordinates)
-        # draw_board(self.state, 9)
 
         for m in move_coordinates:
             state_copy = self.state.copy()
@@ -641,9 +628,6 @@ class Gomoku:
                 else:
                     state_copy[m] = 1
                     lst.append(Gomoku(state_copy, self.state, curr_depth=self.curr_depth+1))
-
-        # for board in lst:
-        # draw_board(self.state, 9)
                 
         return lst
 
@@ -651,14 +635,14 @@ class Gomoku:
         """Return the score of min or max depending on the perspective"""
         
         if self.is_terminal() or self.curr_depth > 1:
-            #count black patterns
+            # Count black patterns
             [black_open_two, black_half_two] = self.get_threat_patterns(color=1, length=2)
             [black_open_three, black_half_three] = self.get_threat_patterns(color=1, length=3)
             [black_open_four, black_half_four] = self.get_threat_patterns(color=1, length=4)
             [black_open_five, black_half_five] = self.get_threat_patterns(color=1, length=5)
             black_five = black_open_five + black_half_five
 
-            #count white patterns
+            # Count white patterns
             [white_open_two, white_half_two] = self.get_threat_patterns(color=2, length=2)
             [white_open_three, white_half_three] = self.get_threat_patterns(color=2, length=3)
             [white_open_four, white_half_four] = self.get_threat_patterns(color=2, length=4)
@@ -673,10 +657,10 @@ class Gomoku:
             two_open_diff = black_open_two - white_open_two
             two_half_diff = black_half_two - white_half_two
 
-            return (6000 * five_diff + 
-            4800 * four_open_diff + 500 * four_half_diff + 
-            500 * three_open_diff + 200 * three_half_diff + 
-            50 * two_open_diff + 10 * two_half_diff), self.state
+            return (10000 * five_diff + 
+            5000 * four_open_diff + 2500 * four_half_diff + 
+            2000 * three_open_diff + 1000 * three_half_diff + 
+            250 * two_open_diff + 50 * two_half_diff), self.state
 
         scores = []
         for board in self.get_possible_moves():
