@@ -5,6 +5,7 @@ Full Name(s): Jiayi Chen, Siyuan Niu
 
 """
 
+import random
 import itertools
 from typing import List, Optional, Sequence, Tuple
 
@@ -45,7 +46,7 @@ class Gomoku:
                                             all values are initialized as 0's
             parent: parent Gomoku, None indicates the root node. Defaults to None.
             gameStatus: (int or string)  = 1 if black wins, = 2 if white wins, = 0 if a draw, otherwise "game_on"
-            curr_depth: depth of the Gomoku node in the expectiminimax tree
+            curr_depth: depth of the Gomoku node in the minimax tree
         """
         self.state = state  # To facilitate "hashable" make state immutable
         self.parent = parent
@@ -631,10 +632,10 @@ class Gomoku:
                 
         return lst
 
-    def minimax(self, maximizing: bool) -> int:
+    def minimax(self, maximizing: bool, depth: int) -> int:
         """Return the score of min or max depending on the perspective"""
         
-        if self.is_terminal() or self.curr_depth > 1:
+        if self.is_terminal() or self.curr_depth > depth:
             # Count black patterns
             [black_open_two, black_half_two] = self.get_threat_patterns(color=1, length=2)
             [black_open_three, black_half_three] = self.get_threat_patterns(color=1, length=3)
@@ -670,12 +671,189 @@ class Gomoku:
 
         scores = []
         for board in self.get_possible_moves():
-            scores.append(board.minimax(not maximizing))
+            scores.append(board.minimax(not maximizing, depth=depth))
 
         if maximizing:
             return max(scores, key=lambda item:item[0])
         else:
             return min(scores, key=lambda item:item[0])
+
+
+    def new_minimax(self, maximizing: bool, depth: int, alpha=float('-inf'), beta=float('inf')) -> tuple([int, dict]):
+        """With alpha-beta pruning, return the score of min or max depending on the perspective"""
+        
+        if self.is_terminal() or self.curr_depth > depth:
+            # Count black patterns
+            [black_open_two, black_half_two] = self.get_threat_patterns(color=1, length=2)
+            [black_open_three, black_half_three] = self.get_threat_patterns(color=1, length=3)
+            [black_open_four, black_half_four] = self.get_threat_patterns(color=1, length=4)
+            [black_open_five, black_half_five] = self.get_threat_patterns(color=1, length=5)
+            black_five = black_open_five + black_half_five
+
+            # Count white patterns
+            [white_open_two, white_half_two] = self.get_threat_patterns(color=2, length=2)
+            [white_open_three, white_half_three] = self.get_threat_patterns(color=2, length=3)
+            [white_open_four, white_half_four] = self.get_threat_patterns(color=2, length=4)
+            [white_open_five, white_half_five] = self.get_threat_patterns(color=2, length=5)
+            white_five = white_open_five + white_half_five
+
+            five_diff = black_five - white_five
+            four_open_diff = black_open_four - white_open_four
+            four_half_diff = black_half_four - white_half_four
+            three_open_diff = black_open_three - white_open_three
+            three_half_diff = black_half_three - white_half_three
+            two_open_diff = black_open_two - white_open_two
+            two_half_diff = black_half_two - white_half_two
+            
+            return (10000 * five_diff + 
+            5000 * four_open_diff + 2500 * four_half_diff + 
+            2000 * three_open_diff + 1000 * three_half_diff + 
+            250 * two_open_diff + 50 * two_half_diff), self.state
+
+
+        if maximizing:
+            bestValue = (float('-inf'), self.state)
+            for board in self.get_possible_moves():
+                value = (board.new_minimax(not maximizing, depth=depth, alpha=alpha, beta=beta))
+                bestValue = max(bestValue, value, key=lambda item:item[0]) 
+                alpha = max(alpha, bestValue[0])
+                # print(alpha)
+                if beta <= alpha:
+                    break
+
+            return bestValue
+
+        else:
+            bestValue = (float('inf'), self.state)
+            for board in self.get_possible_moves():
+                value = (board.new_minimax(not maximizing, depth=depth, alpha=alpha, beta=beta))
+                bestValue = min(bestValue, value, key=lambda item:item[0]) 
+                beta = min(beta, bestValue[0])
+                if beta <= alpha:
+                    break
+
+            return bestValue
+
+
+    def best_move(self, depth) -> tuple([tuple([int, int]), int]):
+        filled = [x for x in self.state if self.state[x] > 0]
+        move_coordinates = set()
+        
+        for (row, col) in filled:
+            neighbors = [
+                (row + 1, col),
+                (row - 1, col),
+                (row, col + 1),
+                (row, col - 1),
+                (row + 1, col - 1),
+                (row - 1, col + 1),
+                (row + 1, col + 1),
+                (row - 1, col - 1)]
+                
+            for n in neighbors:
+                if n[0] < 0 or n[1] < 0 or n[0] > BOARD_SIZE - 1 or n[1] > BOARD_SIZE - 1 :
+                    continue
+                if self.state[n] == 0:
+                    move_coordinates.add(n)
+        # print(move_coordinates)
+        bestMove = None, 0
+
+        alpha = float('-inf')
+        for m in move_coordinates:
+            state_copy = self.state.copy()
+            state_copy[m] = 1
+            gomoku = Gomoku(state=state_copy, curr_depth=self.curr_depth+1)
+            score = gomoku.new_minimax(maximizing=False, depth=depth, alpha=alpha)[0]
+            # print(score)
+            if score >= bestMove[1]:
+                # bestValue = (float('-inf'), self.state)
+                # bestValue = max(bestValue, score, key=lambda item:item[0]) 
+                alpha = max(alpha, score)
+                bestMove = m, score
+                
+        return bestMove
+
+    
+    def play(self, depth) -> int:
+        if self.is_terminal():
+            # draw_board(self.state, 9)
+            return self.gameStatus
+        
+        filled = [x for x in self.state if self.state[x] > 0]
+        move_coordinates = set()
+        
+        for (row, col) in filled:
+            neighbors = [
+                (row + 1, col),
+                (row - 1, col),
+                (row, col + 1),
+                (row, col - 1),
+                (row + 1, col - 1),
+                (row - 1, col + 1),
+                (row + 1, col + 1),
+                (row - 1, col - 1)]
+                
+            for n in neighbors:
+                if n[0] < 0 or n[1] < 0 or n[0] > BOARD_SIZE - 1 or n[1] > BOARD_SIZE - 1 :
+                    continue
+                if self.state[n] == 0:
+                    move_coordinates.add(n)
+            
+            
+        # print(move_coordinates)
+        move_coordinates2 = list(move_coordinates)
+        state_copy = self.state.copy()
+        if len(self.blacks) > len(self.whites):
+            coordinate = random.choice(move_coordinates2)
+            state_copy[coordinate] = 2
+            new_board = Gomoku(state=state_copy, curr_depth=self.curr_depth+1)
+        else:
+            coordinate = self.best_move(depth)[0]
+            state_copy[coordinate] = 1
+            new_board = Gomoku(state=state_copy, curr_depth=self.curr_depth+1)
+
+        return new_board.play(depth)
+
+
+    def play_randomly(self) -> int:
+        if self.is_terminal():
+            # draw_board(self.state, 9)
+            return self.gameStatus
+        
+        filled = [x for x in self.state if self.state[x] > 0]
+        move_coordinates = set()
+        
+        for (row, col) in filled:
+            neighbors = [
+                (row + 1, col),
+                (row - 1, col),
+                (row, col + 1),
+                (row, col - 1),
+                (row + 1, col - 1),
+                (row - 1, col + 1),
+                (row + 1, col + 1),
+                (row - 1, col - 1)]
+                
+            for n in neighbors:
+                if n[0] < 0 or n[1] < 0 or n[0] > BOARD_SIZE - 1 or n[1] > BOARD_SIZE - 1 :
+                    continue
+                if self.state[n] == 0:
+                    move_coordinates.add(n)
+            
+            
+        # print(move_coordinates)
+        move_coordinates2 = list(move_coordinates)
+        state_copy = self.state.copy()
+        if len(self.blacks) > len(self.whites):
+            coordinate = random.choice(move_coordinates2)
+            state_copy[coordinate] = 2
+            new_board = Gomoku(state=state_copy, curr_depth=self.curr_depth+1)
+        else:
+            coordinate = random.choice(move_coordinates2)
+            state_copy[coordinate] = 1
+            new_board = Gomoku(state=state_copy, curr_depth=self.curr_depth+1)
+
+        return new_board.play_randomly()
 
 
 if __name__ == "__main__":
