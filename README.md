@@ -1,9 +1,8 @@
 # CS311 Final Project - Gomoku Algorithm
 
-Gomoku, or five in a row, is an abstract strategy board game where two players place a
-stone of their color on a 15x15 empty intersection. The winner is the first whose stones form an unbroken chain of five horizontally, vertically, or diagonally.
- 
-Our goal is to design an agent that plays with a human player in real time. We intend to optimize both search efficiency and the chances of winning by implementing a minimax tree model and to explore how pruning or heuristic functions may improve the model performance. Some ways to evaluate the model performance include: if the agent will always win given a mistake firstly made by the human player, the number of steps it takes to beat the opponent, and the duration of each search.
+Gomoku, or five in a row, is an abstract strategy board game where two players place a stone—either black or white—on a 15x15 board. The winner is the first to form an unbroken chain of five stones horizontally, vertically, or diagonally. Minimax algorithm is widely used in board games involving two-player competition such as Tic-Tac-Toe [1]. In 1992, Vardi [2] added expected values and utility into the minimax algorithm, making it possible to use evaluation functions to predict and calculates the possible scenarios. However, due to minimax’s O(b^d) time complexity, researchers have implemented various methods to improve its search performance especially in more complex games such as Gomoku. Typical methods include alpha-beta pruning that eliminates unpromising nodes [3], Monte Carlo Search Trees that adds randomization [4], and various heuristic functions [3]-[5]. 
+
+We intend to implement the minimax algorithm with alpha-beta pruning and heuristic functions in Gomoku. We also explore how limiting relevant moves and different depth limits affect algorithm performance based on both search time and wining chances. 
 
 For our final report, please refer to "CS 311 Final Project Poster.pdf".
 
@@ -33,3 +32,11 @@ Ran 9 tests in 0.068s
 OK
 ```
 
+## References
+
+[1] Y. PIRILDAK, “Mastering Tic-Tac-Toe with Minimax Algorithm,” Medium, May 13, 2020. https://levelup.gitconnected.com/mastering-tic-tac-toe-with-minimax-algorithm-3394d65fa88f (accessed Dec. 10, 2022).
+[2] A. Vardi, “New minimax algorithm,” J Optim Theory Appl, vol. 75, no. 3, pp. 613–634, Dec. 1992, doi: 10.1007/BF00940496.
+[3] E. Nygren, “Design Specifications for an Interactive Teaching Tool for Game AI using Gomoku”. 
+[4] Yu. (2019). AI Agent for Playing Gomoku. Retrieved December 9, 2022. https://stanford-cs221.github.io/autumn2019-extra/posters/14.pdf 
+[5] H. Liao, “New heuristic algorithm to improve the Minimax for Gomoku artificial intelligence”.
+[6] “Minimax Improvements.” https://blog.theofekfoundation.org/artificial-intelligence/2015/12/18/minimax-improvements/ (accessed Dec. 17, 2022).

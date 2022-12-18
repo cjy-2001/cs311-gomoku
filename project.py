@@ -717,7 +717,6 @@ class Gomoku:
                 value = (board.new_minimax(not maximizing, depth=depth, alpha=alpha, beta=beta))
                 bestValue = max(bestValue, value, key=lambda item:item[0]) 
                 alpha = max(alpha, bestValue[0])
-                # print(alpha)
                 if beta <= alpha:
                     break
 
@@ -736,6 +735,7 @@ class Gomoku:
 
 
     def best_move(self, depth) -> tuple([tuple([int, int]), int]):
+        """Return the best move for black based on score calculated from minimax"""
         filled = [x for x in self.state if self.state[x] > 0]
         move_coordinates = set()
         
@@ -755,7 +755,7 @@ class Gomoku:
                     continue
                 if self.state[n] == 0:
                     move_coordinates.add(n)
-        # print(move_coordinates)
+
         bestMove = None, 0
 
         alpha = float('-inf')
@@ -764,10 +764,7 @@ class Gomoku:
             state_copy[m] = 1
             gomoku = Gomoku(state=state_copy, curr_depth=self.curr_depth+1)
             score = gomoku.new_minimax(maximizing=False, depth=depth, alpha=alpha)[0]
-            # print(score)
             if score >= bestMove[1]:
-                # bestValue = (float('-inf'), self.state)
-                # bestValue = max(bestValue, score, key=lambda item:item[0]) 
                 alpha = max(alpha, score)
                 bestMove = m, score
                 
@@ -775,6 +772,7 @@ class Gomoku:
 
     
     def play(self, depth) -> int:
+        """Played on the current board, with black uses minimax with depth and white playing randomly"""
         if self.is_terminal():
             # draw_board(self.state, 9)
             return self.gameStatus
@@ -800,7 +798,6 @@ class Gomoku:
                     move_coordinates.add(n)
             
             
-        # print(move_coordinates)
         move_coordinates2 = list(move_coordinates)
         state_copy = self.state.copy()
         if len(self.blacks) > len(self.whites):
@@ -816,6 +813,7 @@ class Gomoku:
 
 
     def play_randomly(self) -> int:
+        """Played on the current board, with both black and white playing randomly"""
         if self.is_terminal():
             # draw_board(self.state, 9)
             return self.gameStatus
@@ -841,7 +839,6 @@ class Gomoku:
                     move_coordinates.add(n)
             
             
-        # print(move_coordinates)
         move_coordinates2 = list(move_coordinates)
         state_copy = self.state.copy()
         if len(self.blacks) > len(self.whites):
