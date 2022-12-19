@@ -555,7 +555,7 @@ class Tests(unittest.TestCase):
         blackWin = 0
 
         for i in range(100):
-            if gomoku.play(depth=0) == 1:
+            if gomoku.play(depth=1) == 1:
                 blackWin += 1
             # draw_board(gomoku.state, 9)
         
