@@ -1,6 +1,20 @@
 # CS311 Final Project - Gomoku Algorithm
 
-[![Coverage Status](https://coveralls.io/repos/github/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME/badge.svg?branch=master)](https://coveralls.io/github/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME?branch=master)
+![Tests](https://img.shields.io/badge/Tests-Passing-green) 
+[![Coverage Status](https://coveralls.io/repos/github/cjy-2001/cs311-gomoku/badge.svg?branch=main)](https://coveralls.io/github/cjy-2001/cs311-gomoku?branch=main) [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](https://github.com/cjy-2001/cs311-gomoku/blob/main/CS%20311%20Final%20Project%20Report.pdf)
+[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
+
+> An AI algorithm for the abstract strategy board game, Gomoku.
+
+## Table of Contents
+
+- [Background](#background)
+- [Install](#install)
+- [Test](#test)
+- [Method](#method)
+- [References](#references)
+
+## Background
 
 Gomoku, or five in a row, is an abstract strategy board game where two players place a stone—either black or white—on a 15x15 board. The winner is the first to form an unbroken chain of five stones horizontally, vertically, or diagonally. Minimax algorithm is widely used in board games involving two-player competition such as Tic-Tac-Toe [1]. In 1992, Vardi [2] added expected values and utility into the minimax algorithm, making it possible to use evaluation functions to predict and calculates the possible scenarios. However, due to minimax’s O(b^d) time complexity, researchers have implemented various methods to improve its search performance especially in more complex games such as Gomoku. Typical methods include alpha-beta pruning that eliminates unpromising nodes [3], Monte Carlo Search Trees that adds randomization [4], and various heuristic functions [3]-[5]. 
 
@@ -10,19 +24,14 @@ We intend to implement the minimax algorithm with alpha-beta pruning and heurist
 
 For our final report, please refer to [CS 311 Final Project Report](https://github.com/cjy-2001/cs311-gomoku/blob/main/CS%20311%20Final%20Project%20Report.pdf) and [CS 311 Final Project Poster](https://github.com/cjy-2001/cs311-gomoku/blob/main/CS%20311%20Final%20Project%20Poster.pdf).
 
-## Method
+## Install
 
-To resolve computational difficulties, we’ll start by a small board size and try limiting the depth and breadth of the tree by, for example, restricting the set of unassigned grids to those adjacent to the assigned ones only or by limiting the depth of the evaluation function. 
+```bash
+git clone https://github.com/cjy-2001/cs311-gomoku.git
+cd cs311-gomoku
+```
 
-Several sample codes are available as references for our project, in which the game is a class with functions that initialize the board, determine the game termination, calculate the agent's optimal move, and optimize the minimax via alpha-beta pruning. Our board initialization, meanwhile, will be similar to that of a sudoku in PA2 where we use a dictionary storing the cell indices and its corresponding stones when filled by a player.  For example, in the initial board, all cells will be marked as 0. Then we can use 1 and 2 to denote two players’ moves. Thus the board below would be represented as:
- [0, 0, 0, 0, 0, 
-  0, 0, 1, 2, 0,
-  0, 0, 1, 0, 0, 
-  0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0]
-
-
-## Unit testing
+## Test
 
 We have also included multiple tests to evaluate our code and resulted performance.
 You can run the tests by executing the `project_test.py` file as a program, e.g. `python3 project_test.py`
@@ -35,6 +44,17 @@ Ran 9 tests in 0.068s
 
 OK
 ```
+
+## Method
+
+To resolve computational difficulties, we start by a small board size and try limiting the depth and breadth of the tree by, for example, restricting the set of unassigned grids to those adjacent to the assigned ones only or by limiting the depth of the evaluation function. 
+
+Several sample codes are available as references for our project, in which the game is a class with functions that initialize the board, determine the game termination, calculate the agent's optimal move, and optimize the minimax via alpha-beta pruning. Our board initialization, meanwhile, will be similar to that of a sudoku in PA2 where we use a dictionary storing the cell indices and its corresponding stones when filled by a player.  For example, in the initial board, all cells will be marked as 0. Then we can use 1 and 2 to denote two players’ moves. Thus the board below would be represented as:
+ [0, 0, 0, 0, 0, 
+  0, 0, 1, 2, 0,
+  0, 0, 1, 0, 0, 
+  0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0]
 
 ## References
 
