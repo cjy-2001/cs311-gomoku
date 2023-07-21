@@ -2,6 +2,7 @@
 
 ![Tests](https://img.shields.io/badge/Tests-Passing-green) 
 [![Coverage Status](https://coveralls.io/repos/github/cjy-2001/cs311-gomoku/badge.svg?branch=main)](https://coveralls.io/github/cjy-2001/cs311-gomoku?branch=main) 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cjy-2001/cs311-gomoku/HEAD)
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](https://github.com/cjy-2001/cs311-gomoku/blob/main/CS%20311%20Final%20Project%20Report.pdf)
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
