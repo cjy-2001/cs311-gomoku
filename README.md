@@ -1,7 +1,8 @@
 # CS311 Final Project - Gomoku Algorithm
 
 ![Tests](https://img.shields.io/badge/Tests-Passing-green) 
-[![Coverage Status](https://coveralls.io/repos/github/cjy-2001/cs311-gomoku/badge.svg?branch=main)](https://coveralls.io/github/cjy-2001/cs311-gomoku?branch=main) [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](https://github.com/cjy-2001/cs311-gomoku/blob/main/CS%20311%20Final%20Project%20Report.pdf)
+[![Coverage Status](https://coveralls.io/repos/github/cjy-2001/cs311-gomoku/badge.svg?branch=main)](https://coveralls.io/github/cjy-2001/cs311-gomoku?branch=main) 
+[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](https://github.com/cjy-2001/cs311-gomoku/blob/main/CS%20311%20Final%20Project%20Report.pdf)
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
 > An AI algorithm for the abstract strategy board game, Gomoku.
