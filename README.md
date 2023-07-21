@@ -31,13 +31,25 @@ git clone https://github.com/cjy-2001/cs311-gomoku.git
 cd cs311-gomoku
 ```
 
+## Usage
+
+To use this project, you can run the project.py script with a single argument representing the current state of a 9x9 Gomoku board. The board should be represented as a list of 81 integers (0, 1, or 2), with 0 representing an unoccupied cell, 1 representing a cell occupied by player 1's stone, and 2 representing a cell occupied by player 2's stone. It should be player 1's (black's) turn to play. The script will output the best move for player 1 as a coordinate (row, column), with both row and column being 0-indexed and ranging from 0 to 8.
+
+For example, to get the best move for an empty board, you can run:
+
+```bash
+python project.py "[0,0,0,0,0, 0,2,2,1,0, 0,2,1,0,0, 0,1,2,0,0, 1,0,0,0,0]" 5
+```
+
+This will output a coordinate such as (4, 4), indicating that the best move for player 1 is to place their stone in the center of the board.
+
 ## Test
 
 We have also included multiple tests to evaluate our code and resulted performance.
 You can run the tests by executing the `project_test.py` file as a program, e.g. `python3 project_test.py`
 
-```
-$ python3 project_test.py
+```bash
+python project_test.py
 .........
 ----------------------------------------------------------------------
 Ran 9 tests in 0.068s

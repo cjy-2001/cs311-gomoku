@@ -22,6 +22,10 @@ class GomokuTest(unittest.TestCase):
 
 
     def test_is_terminal(self):
+        """
+        Test the is_terminal method to check if the game will end properly.
+        """
+                
         # Testing 5-in-a-column
         self.board[1, 3] = 2
         self.board[2, 3] = 1
@@ -101,6 +105,7 @@ class GomokuTest(unittest.TestCase):
         """
         Test the get_threat_patterns method to check the number of open and half-open sequences of length 4.
         """
+
         # Test open four for black
         for i in range(1, 5):
             self.board[i, 3] = 1
@@ -154,6 +159,7 @@ class GomokuTest(unittest.TestCase):
         """
         Test the get_threat_patterns method to check the number of open and half-open sequences of length 2.
         """
+        
         # Test open two for black
         for i in range(3, 5):
             self.board[i, 3] = 1
@@ -190,6 +196,7 @@ class GomokuTest(unittest.TestCase):
         """
         Test the get_threat_patterns method with multiple shapes on the board.
         """
+        
         # Define the initial board state
         for i in range(3, 5):
             self.board[1, i] = 2

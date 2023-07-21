@@ -7,12 +7,9 @@ Full Name(s): Jiayi Chen, Siyuan Niu
 
 import random
 import itertools
+import argparse
+import json
 from typing import List, Dict
-
-
-# Problem constants
-BOARD_SIZE = 9
-
 
 # def draw_board(dic, size):
 #     """
@@ -35,8 +32,11 @@ class Gomoku:
     """
     Class representing the Gomoku game.
     """
+
+    # Problem constants
+    BOARD_SIZE = 9
     
-    def __init__(self, state: Dict = None, curr_depth: int = 0):
+    def __init__(self, state: Dict = None, board_size: int = BOARD_SIZE, curr_depth: int = 0):
         """
         Initializes a Gomoku object.
 
@@ -45,10 +45,12 @@ class Gomoku:
         - curr_depth: The current depth of the game tree in the Minimax search.
         """
 
+        self.board_size = board_size
+
         if state is None:
             self.state = {}
-            for i in range(BOARD_SIZE):
-                for j in range(BOARD_SIZE):
+            for i in range(self.board_size):
+                for j in range(self.board_size):
                     self.state[(i, j)] = 0
         else:
             # If a state is provided, use it as the current game state.
@@ -80,7 +82,7 @@ class Gomoku:
                 return color
 
         # Check if the board is full (it's a draw)
-        if len(self.blacks) + len(self.whites) == BOARD_SIZE ** 2:
+        if len(self.blacks) + len(self.whites) == self.board_size ** 2:
             self.gameStatus = 3
             return 3
 
@@ -128,7 +130,7 @@ class Gomoku:
             possible_diag1_coordinates = []
             possible_diag2_coordinates = []
 
-            for x in range(0, BOARD_SIZE):
+            for x in range(0, self.board_size):
                 if abs(x - row_num) < length:
                     possible_col_coordinates.append((x, col_num))
                 if abs(x - col_num) < length:
@@ -140,7 +142,6 @@ class Gomoku:
             while len(possible_row_coordinates) >= length:
                 possible_row_seqs.append(possible_row_coordinates[0:length])
                 possible_row_coordinates.pop(0)
-
 
             # Diagonal 1
             # Upper-left corner coordinates
@@ -155,7 +156,7 @@ class Gomoku:
             # Lower-right corner coordinates
             row_index = row_num
             col_index = col_num
-            while (row_index + 1 < BOARD_SIZE) and (col_index + 1 < BOARD_SIZE):
+            while (row_index + 1 < self.board_size) and (col_index + 1 < self.board_size):
                 if (abs(row_index - row_num) + abs(col_index - col_num)) < length * 2:
                     possible_diag1_coordinates.append((row_index + 1, col_index + 1))
                 row_index += 1
@@ -166,12 +167,11 @@ class Gomoku:
                 possible_diag1_seqs.append(possible_diag1_coordinates[0:length])
                 possible_diag1_coordinates.pop(0)
 
-
             # Diagonal 2
             # Upper-right corner coordinates
             row_index = row_num
             col_index = col_num
-            while (row_index > -1) and (col_index < BOARD_SIZE):
+            while (row_index > -1) and (col_index < self.board_size):
                 if (abs(row_index - row_num) + abs(col_index - col_num)) < length * 2:
                     possible_diag2_coordinates.insert(0, (row_index, col_index))
                 row_index -= 1
@@ -180,7 +180,7 @@ class Gomoku:
             # Lower-left corner coordinates
             row_index = row_num
             col_index = col_num
-            while (row_index + 1 < BOARD_SIZE) and (col_index - 1 > -1) and (col_index + 1 < BOARD_SIZE):
+            while (row_index + 1 < self.board_size) and (col_index - 1 > -1) and (col_index + 1 < self.board_size):
                 if (abs(row_index - row_num) + abs(col_index - col_num)) < length * 2:
                     possible_diag2_coordinates.append((row_index + 1, col_index - 1))
                 row_index += 1
@@ -192,7 +192,6 @@ class Gomoku:
                 possible_diag2_seqs.append(possible_diag2_coordinates[0:length])
                 possible_diag2_coordinates.pop(0)
 
-        
         # Remove duplicate sequences
         possible_col_seqs.sort()
         possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
@@ -204,7 +203,6 @@ class Gomoku:
         possible_diag2_seqs_set = set(tuple(x) for x in possible_diag2_seqs)
         possible_diag2_seqs = [ list(x) for x in possible_diag2_seqs_set ]
 
-        
         # Start to count
         # Col
         for possible_col_seq in possible_col_seqs:
@@ -219,14 +217,14 @@ class Gomoku:
                     head = possible_col_seq[0]
                     tail = possible_col_seq[-1]
 
-                    if head[0] != 0 and tail[0] != BOARD_SIZE-1:
+                    if head[0] != 0 and tail[0] != self.board_size-1:
                         if board[(head[0]-1, head[1])] == 0 and board[(tail[0]+1, head[1])] == 0:
                             open += 1
                     
                     if head[0] == 0:
                         if board[tail[0]+1, head[1]] == 0:
                             half += 1
-                    elif tail[0] == BOARD_SIZE-1:
+                    elif tail[0] == self.board_size-1:
                         if board[head[0]-1, head[1]] == 0:
                             half += 1
                     else:
@@ -250,14 +248,14 @@ class Gomoku:
                     head = possible_row_seq[0]
                     tail = possible_row_seq[-1]
 
-                    if head[1] != 0 and tail[1] != BOARD_SIZE-1:
+                    if head[1] != 0 and tail[1] != self.board_size-1:
                         if board[(head[0], head[1]-1)] == 0 and board[(head[0], tail[1]+1)] == 0:
                             open += 1
                     
                     if head[1] == 0:
                         if board[head[0], tail[1]+1] == 0:
                             half += 1
-                    elif tail[1] == BOARD_SIZE-1:
+                    elif tail[1] == self.board_size-1:
                         if board[head[0], head[1]-1] == 0:
                             half += 1
                     else:
@@ -282,18 +280,18 @@ class Gomoku:
                     head = possible_diag1_seq[0]
                     tail = possible_diag1_seq[-1]
 
-                    if head[0] != 0 and head[1] != 0 and tail[0] != BOARD_SIZE-1 and tail[1] != BOARD_SIZE-1:
+                    if head[0] != 0 and head[1] != 0 and tail[0] != self.board_size-1 and tail[1] != self.board_size-1:
                         if board[(head[0]-1, head[1]-1)] == 0 and board[(tail[0]+1, tail[1]+1)] == 0:
                             open += 1
 
-                    if (head[0] == 0 or head[1] == 0) and (tail[0] != BOARD_SIZE-1 and tail[1] != BOARD_SIZE-1):
+                    if (head[0] == 0 or head[1] == 0) and (tail[0] != self.board_size-1 and tail[1] != self.board_size-1):
                         if board[tail[0]+1, tail[1]+1] == 0:
                             half += 1
-                    elif (tail[0] == BOARD_SIZE-1 or tail[1] == BOARD_SIZE-1) and (head[0] != 0 and head[1] != 0):
+                    elif (tail[0] == self.board_size-1 or tail[1] == self.board_size-1) and (head[0] != 0 and head[1] != 0):
                         if board[head[0]-1, head[1]-1] == 0:
                             half += 1
                     else:
-                        if head[0] != 0 and head[1] != 0 and tail[0] != BOARD_SIZE-1 and tail[1] != BOARD_SIZE-1:
+                        if head[0] != 0 and head[1] != 0 and tail[0] != self.board_size-1 and tail[1] != self.board_size-1:
                             if board[(head[0]-1, head[1]-1)] == opponent: 
                                 if board[(tail[0]+1, tail[1]+1)] == 0:
                                     half += 1
@@ -314,20 +312,20 @@ class Gomoku:
                     head = possible_diag2_seq[0]
                     tail = possible_diag2_seq[-1]
 
-                    if head[0] != 0 and head[1] != BOARD_SIZE-1 and tail[0] != BOARD_SIZE-1 and tail[1] != 0:
+                    if head[0] != 0 and head[1] != self.board_size-1 and tail[0] != self.board_size-1 and tail[1] != 0:
                         if board[(head[0]-1, head[1]+1)] == 0 and board[(tail[0]+1, tail[1]-1)] == 0:
                             open += 1
 
-                    if (head[0] == 0 or head[1] == BOARD_SIZE-1) and (tail[0] != BOARD_SIZE-1 and tail[1] != 0):
+                    if (head[0] == 0 or head[1] == self.board_size-1) and (tail[0] != self.board_size-1 and tail[1] != 0):
                         if board[tail[0]+1, tail[1]-1] == 0:
                             half += 1
                             
-                    elif (tail[0] == BOARD_SIZE-1 or tail[1] == 0) and (head[0] != 0 and head[1] != BOARD_SIZE-1):
+                    elif (tail[0] == self.board_size-1 or tail[1] == 0) and (head[0] != 0 and head[1] != self.board_size-1):
                         if board[head[0]-1, head[1]+1] == 0:
                             half += 1
                             
                     else:
-                        if head[0] != 0 and head[1] != BOARD_SIZE-1 and tail[0] != BOARD_SIZE-1 and tail[1] != 0:
+                        if head[0] != 0 and head[1] != self.board_size-1 and tail[0] != self.board_size-1 and tail[1] != 0:
                             if board[(head[0]-1, head[1]+1)] == opponent: 
                                 if board[(tail[0]+1, tail[1]-1)] == 0:
                                     half += 1
@@ -367,7 +365,7 @@ class Gomoku:
                 (row - 1, col - 1)]
                 
             for n in neighbors:
-                if n[0] < 0 or n[1] < 0 or n[0] > BOARD_SIZE - 1 or n[1] > BOARD_SIZE - 1 :
+                if n[0] < 0 or n[1] < 0 or n[0] > self.board_size - 1 or n[1] > self.board_size - 1 :
                     continue
                 move_coordinates.add(n)
 
@@ -377,10 +375,10 @@ class Gomoku:
             if self.state[m] == 0:
                 if len(self.blacks) > len(self.whites):
                     state_copy[m] = 2
-                    lst.append(Gomoku(state_copy, curr_depth=self.curr_depth+1))
+                    lst.append(Gomoku(state=state_copy, board_size=self.board_size, curr_depth=self.curr_depth+1))
                 else:
                     state_copy[m] = 1
-                    lst.append(Gomoku(state_copy, curr_depth=self.curr_depth+1))
+                    lst.append(Gomoku(state=state_copy, board_size=self.board_size, curr_depth=self.curr_depth+1))
                 
         return lst
 
@@ -527,7 +525,7 @@ class Gomoku:
                 (row - 1, col - 1)]
                 
             for n in neighbors:
-                if n[0] < 0 or n[1] < 0 or n[0] > BOARD_SIZE - 1 or n[1] > BOARD_SIZE - 1 :
+                if n[0] < 0 or n[1] < 0 or n[0] > self.board_size - 1 or n[1] > self.board_size - 1 :
                     continue
                 if self.state[n] == 0:
                     move_coordinates.add(n)
@@ -538,7 +536,7 @@ class Gomoku:
         for m in move_coordinates:
             state_copy = self.state.copy()
             state_copy[m] = 1
-            gomoku = Gomoku(state=state_copy, curr_depth=self.curr_depth+1)
+            gomoku = Gomoku(state=state_copy, board_size=self.board_size, curr_depth=self.curr_depth+1)
             score = gomoku.new_minimax(maximizing=False, depth=depth, alpha=alpha)[0]
             if score >= bestMove[1]:
                 alpha = max(alpha, score)
@@ -573,7 +571,7 @@ class Gomoku:
                 (row - 1, col - 1)]
                 
             for n in neighbors:
-                if n[0] < 0 or n[1] < 0 or n[0] > BOARD_SIZE - 1 or n[1] > BOARD_SIZE - 1 :
+                if n[0] < 0 or n[1] < 0 or n[0] > self.board_size - 1 or n[1] > self.board_size - 1 :
                     continue
                 if self.state[n] == 0:
                     move_coordinates.add(n)
@@ -584,11 +582,11 @@ class Gomoku:
         if len(self.blacks) > len(self.whites):
             coordinate = random.choice(move_coordinates2)
             state_copy[coordinate] = 2
-            new_board = Gomoku(state=state_copy, curr_depth=self.curr_depth+1)
+            new_board = Gomoku(state=state_copy, board_size=self.board_size, curr_depth=self.curr_depth+1)
         else:
             coordinate = self.best_move(depth)[0]
             state_copy[coordinate] = 1
-            new_board = Gomoku(state=state_copy, curr_depth=self.curr_depth+1)
+            new_board = Gomoku(state=state_copy, board_size=self.board_size, curr_depth=self.curr_depth+1)
 
         return new_board.play(depth)
 
@@ -616,7 +614,7 @@ class Gomoku:
                 (row - 1, col - 1)]
                 
             for n in neighbors:
-                if n[0] < 0 or n[1] < 0 or n[0] > BOARD_SIZE - 1 or n[1] > BOARD_SIZE - 1 :
+                if n[0] < 0 or n[1] < 0 or n[0] > self.board_size - 1 or n[1] > self.board_size - 1 :
                     continue
                 if self.state[n] == 0:
                     move_coordinates.add(n)
@@ -627,14 +625,37 @@ class Gomoku:
         if len(self.blacks) > len(self.whites):
             coordinate = random.choice(move_coordinates2)
             state_copy[coordinate] = 2
-            new_board = Gomoku(state=state_copy, curr_depth=self.curr_depth+1)
+            new_board = Gomoku(state=state_copy, board_size=self.board_size, curr_depth=self.curr_depth+1)
         else:
             coordinate = random.choice(move_coordinates2)
             state_copy[coordinate] = 1
-            new_board = Gomoku(state=state_copy, curr_depth=self.curr_depth+1)
+            new_board = Gomoku(state=state_copy, board_size=self.board_size, curr_depth=self.curr_depth+1)
 
         return new_board.play_randomly()
 
 
+def main():
+    parser = argparse.ArgumentParser(description='Gomoku AI Agent')
+    parser.add_argument('board', metavar='B', type=str, help='The current state of the game board')
+    parser.add_argument('board_size', metavar='S', type=int, help='The size of the game board')
+
+    args = parser.parse_args()
+
+    board = json.loads(args.board)
+    board_size = args.board_size
+
+    if isinstance(board, list):
+        # Convert the list to a dictionary
+        board_dict = {(i//board_size, i%board_size): board[i] for i in range(len(board))}
+        gomoku = Gomoku(state=board_dict, board_size=board_size)
+    elif isinstance(board, dict):
+        gomoku = Gomoku(state=board, board_size=board_size)
+    else:
+        raise TypeError("Board must be either a list or a dictionary")
+
+    # Print the best move
+    print(gomoku.best_move(3)[0])  # Assuming a depth of 3 for the minimax algorithm
+
+
 if __name__ == "__main__":
-    pass
+    main()
