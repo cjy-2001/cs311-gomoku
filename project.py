@@ -14,21 +14,21 @@ from typing import List, Dict
 BOARD_SIZE = 9
 
 
-def draw_board(dic, size):
-    """
-    Helper function to draw the current board (debug purpose).
+# def draw_board(dic, size):
+#     """
+#     Helper function to draw the current board (debug purpose).
 
-    Args:
-    - dic: current board
-    - size: size of the bard
-    """
+#     Args:
+#     - dic: current board
+#     - size: size of the bard
+#     """
     
-    lst = list(dic.values())
-    for i in range(len(lst)):
-        if (i+1)% size ==0:
-            print(lst[i])
-        else:
-            print(lst[i], end = " ")
+#     lst = list(dic.values())
+#     for i in range(len(lst)):
+#         if (i+1)% size ==0:
+#             print(lst[i])
+#         else:
+#             print(lst[i], end = " ")
 
 
 class Gomoku:
@@ -597,7 +597,7 @@ class Gomoku:
         """
         Played on the current board, with both black and white playing randomly.
         """
-        
+
         if self.is_terminal():
             return self.is_terminal()
         

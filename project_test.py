@@ -1,17 +1,17 @@
 import sys, unittest
 from project import Gomoku
 
-def draw_board(dic, size):
-    """
-    Helper function to draw the current board (debug purpose).
-    """
+# def draw_board(dic, size):
+#     """
+#     Helper function to draw the current board (debug purpose).
+#     """
     
-    lst = list(dic.values())
-    for i in range(len(lst)):
-        if (i+1)% size ==0:
-            print(lst[i])
-        else:
-            print(lst[i], end = " ")
+#     lst = list(dic.values())
+#     for i in range(len(lst)):
+#         if (i+1)% size ==0:
+#             print(lst[i])
+#         else:
+#             print(lst[i], end = " ")
 
 
 class GomokuTest(unittest.TestCase):
@@ -133,7 +133,7 @@ class GomokuTest(unittest.TestCase):
             self.board[i, 3] = 1
         self.gomoku = Gomoku(state=self.board)
         open_three, half_open_three = self.gomoku.get_threat_patterns(1, 3)
-        
+
         self.assertEqual(open_three, 1, "Failed on open three test for black")
         self.assertEqual(half_open_three, 0, "Failed on half-open three test for black")
 
@@ -466,7 +466,7 @@ class GomokuTest(unittest.TestCase):
         self.assertTrue(move in [(1, 1), (1, 6)], "Best move validation failed")
 
     
-    def test_play(self):
+    def test_play_methods(self):
         """
         Test the play method.
         """
