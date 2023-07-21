@@ -47,14 +47,17 @@ OK
 
 ## Method
 
-To resolve computational difficulties, we start by a small board size and try limiting the depth and breadth of the tree by, for example, restricting the set of unassigned grids to those adjacent to the assigned ones only or by limiting the depth of the evaluation function. 
+To tackle the computational challenges inherent in solving Gomoku, we adopt a strategy that combines efficient game state representation, focused search, and heuristic evaluation. We start by implementing a small board size and limit the depth and breadth of the search tree to manage the problem's complexity.
 
-Several sample codes are available as references for our project, in which the game is a class with functions that initialize the board, determine the game termination, calculate the agent's optimal move, and optimize the minimax via alpha-beta pruning. Our board initialization, meanwhile, will be similar to that of a sudoku in PA2 where we use a dictionary storing the cell indices and its corresponding stones when filled by a player.  For example, in the initial board, all cells will be marked as 0. Then we can use 1 and 2 to denote two players’ moves. Thus the board below would be represented as:
- [0, 0, 0, 0, 0, 
-  0, 0, 1, 2, 0,
-  0, 0, 1, 0, 0, 
-  0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0]
+The game state is represented using a dictionary, which maps cell indices to the stones placed by players. This approach is akin to a Sudoku representation where we can use 0, 1, and 2 to denote unoccupied, player 1's move, and player 2's move respectively. For instance, an initial board would be represented as a sequence of 0s. As players take their turns, the game state is updated accordingly.
+
+To limit the breadth of the search tree, we consider only the cells adjacent to the already occupied ones for potential moves. This approach reduces the number of nodes to be explored, thereby making the search process more efficient.
+
+The choice of move is determined using the minimax algorithm, a recursive decision-making algorithm widely used in two-player games. We enhance the efficiency of the minimax algorithm with alpha-beta pruning, which prunes away branches in the game tree that do not need to be searched because there already exists a better move available.
+
+We also employ a heuristic evaluation function that estimates the worth of a game state. This heuristic, which is used when the search depth limit is reached or a terminal state is encountered, is based on counting the number of open and half-open sequences of a specified length for a given player. This approach allows the AI to prioritize moves that will lead to a winning position or prevent the opponent from reaching such a position.
+
+By combining these techniques, our implementation provides a robust and efficient solution to the Gomoku game, enabling the AI to make intelligent decisions even with limited computational resources.
 
 ## References
 
