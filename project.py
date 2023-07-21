@@ -7,24 +7,20 @@ Full Name(s): Jiayi Chen, Siyuan Niu
 
 import random
 import itertools
-from typing import List, Optional, Sequence, Tuple
+from typing import List, Dict
 
 
 # Problem constants
 BOARD_SIZE = 9
-INITIAL_BOARD = {}
 
-for row in range(0, BOARD_SIZE):
-    for col in range(0, BOARD_SIZE):
-        INITIAL_BOARD[(row, col)] = 0
-    
 
 def draw_board(dic, size):
-    """Helper function to draw the current board
+    """
+    Helper function to draw the current board (debug purpose).
 
     Args:
-            dic: current board
-            size: size of the bard
+    - dic: current board
+    - size: size of the bard
     """
     
     lst = list(dic.values())
@@ -36,328 +32,77 @@ def draw_board(dic, size):
 
 
 class Gomoku:
-    def __init__(self, state: dict[(int, int): int], parent: "Gomoku" = None, curr_depth=0):
-        """Create Node to track particular state and associated parent and cost
+    """
+    Class representing the Gomoku game.
+    """
+    
+    def __init__(self, state: Dict = None, curr_depth: int = 0):
+        """
+        Initializes a Gomoku object.
 
         Args:
-
-            state (dict[(int, int): int]): current distribution of stones on the board; 
-                                            key as the coordinate (row, col) of the cell and value as the stone (0-empty, 1-black, 2-white);
-                                            all values are initialized as 0's
-            parent: parent Gomoku, None indicates the root node. Defaults to None.
-            gameStatus: (int or string)  = 1 if black wins, = 2 if white wins, = 0 if a draw, otherwise "game_on"
-            curr_depth: depth of the Gomoku node in the minimax tree
+        - state: A dictionary representing the current game state. Keys are tuples of (row, col), values are 1 for black, 2 for white, and 0 for empty.
+        - curr_depth: The current depth of the game tree in the Minimax search.
         """
-        self.state = state  # To facilitate "hashable" make state immutable
-        self.parent = parent
-        self.gameStatus = "game_on" 
+
+        if state is None:
+            self.state = {}
+            for i in range(BOARD_SIZE):
+                for j in range(BOARD_SIZE):
+                    self.state[(i, j)] = 0
+        else:
+            # If a state is provided, use it as the current game state.
+            self.state = state
+
+        self.gameStatus = 0
         self.curr_depth = curr_depth
 
-        # Store coordinates of all black and white stones
-        blacks = []
-        whites = []
-
-        for (key, value) in state.items():
-            if value == 1:
-                blacks.append(key)
-            elif value == 2:
-                whites.append(key)
-
-        self.blacks = blacks
-        self.whites = whites
+        self.blacks = [coordinate for coordinate, value in self.state.items() if value == 1]
+        self.whites = [coordinate for coordinate, value in self.state.items() if value == 2]
 
     
-    def is_terminal(self) -> bool:
-        """Return True if game terminates"""
-        
-        board = self.state
+    def is_terminal(self) -> int:
+        """
+        Checks if the game is in a terminal state (someone has won or it's a draw).
 
-        black_five = 0
-        white_five = 0
+        Returns:
+        - 1 if Black wins
+        - 2 if White wins
+        - 3 if it's a draw
+        - 0 if the game is still in progress
+        """
 
-        # Start with black
-        # Initialize lists of the combinations of coordinates (sequences) on each direction that make black the winner
-        possible_col_seqs = []
-        possible_row_seqs = []
-        possible_diag1_seqs = []
-        possible_diag2_seqs = []
+        # Check rows, columns, and diagonals for a five-in-a-row
+        for color in [1, 2]: 
+            open, half = self.get_threat_patterns(color, 5)
+            if open > 0 or half > 0:
+                self.gameStatus = color
+                return color
 
-        for black in self.blacks:
-            row_num = black[0]
-            col_num = black[1]
-            
-            # Find all possible coordinates that makes black the winner
-            possible_col_coordinates = []
-            possible_row_coordinates = []
-            possible_diag1_coordinates = []
-            possible_diag2_coordinates = []
+        # Check if the board is full (it's a draw)
+        if len(self.blacks) + len(self.whites) == BOARD_SIZE ** 2:
+            self.gameStatus = 3
+            return 3
 
-            # Coordinates in the same row or the same column
-            for x in range(0, BOARD_SIZE):
-                if abs(x - row_num) < 5:
-                    possible_col_coordinates.append((x, col_num))
-                if abs(x - col_num) < 5:
-                    possible_row_coordinates.append((row_num, x))
-
-            # Append the sequence if the coordinates make five-in-a-row or five-in-a-column
-            while len(possible_col_coordinates) >= 5:
-                possible_col_seqs.append(possible_col_coordinates[0:5])
-                possible_col_coordinates.pop(0)
-            while len(possible_row_coordinates) >= 5:
-                possible_row_seqs.append(possible_row_coordinates[0:5])
-                possible_row_coordinates.pop(0)
-
-
-            # Diagonal 1
-            # Upper-left corner coordinates
-            row_index = row_num
-            col_index = col_num
-            while (row_index > -1) and (col_index > -1):
-                if (abs(row_index - row_num) + abs(col_index - col_num)) < 5 * 2:
-                    possible_diag1_coordinates.insert(0, (row_index, col_index))
-                row_index -= 1
-                col_index -= 1
-            
-            # Lower-right corner coordinates
-            row_index = row_num
-            col_index = col_num
-            while (row_index + 1 < BOARD_SIZE) and (col_index + 1 < BOARD_SIZE):
-                if (abs(row_index - row_num) + abs(col_index - col_num)) < 5 * 2:
-                    possible_diag1_coordinates.append((row_index + 1, col_index + 1))
-                row_index += 1
-                col_index += 1
-            
-            # Append the sequence if the coordinates make five-in-a-diagonal
-            while len(possible_diag1_coordinates) >= 5:
-                possible_diag1_seqs.append(possible_diag1_coordinates[0:5])
-                possible_diag1_coordinates.pop(0)
-
-            
-            # Diagonal 2
-            # Upper-right corner coordinates
-            row_index = row_num
-            col_index = col_num
-            while (row_index > -1) and (col_index < BOARD_SIZE):
-                if (abs(row_index - row_num) + abs(col_index - col_num)) < 5 * 2:
-                    possible_diag2_coordinates.insert(0, (row_index, col_index))
-                row_index -= 1
-                col_index += 1
-            
-            # Lower-left corner coordinates
-            row_index = row_num
-            col_index = col_num
-            while (row_index + 1 < BOARD_SIZE) and (col_index - 1 > -1) and (col_index + 1 < BOARD_SIZE):
-                if (abs(row_index - row_num) + abs(col_index - col_num)) < 5 * 2:
-                    possible_diag2_coordinates.append((row_index + 1, col_index - 1))
-                row_index += 1
-                col_index -= 1
-            
-            # Append the sequence if the coordinates make five-in-a-diagonal
-            while len(possible_diag2_coordinates) >= 5:
-                possible_diag2_seqs.append(possible_diag2_coordinates[0:5])
-                possible_diag2_coordinates.pop(0)
-
-            
-        # Remove duplicate sequences
-        possible_col_seqs.sort()
-        possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
-        possible_row_seqs.sort()
-        possible_row_seqs = list(possible_row_seqs for possible_row_seqs,_ in itertools.groupby(possible_row_seqs))
-        possible_diag1_seqs_set = set(tuple(x) for x in possible_diag1_seqs)
-        possible_diag1_seqs = [ list(x) for x in possible_diag1_seqs_set ]
-        possible_diag2_seqs_set = set(tuple(x) for x in possible_diag2_seqs)
-        possible_diag2_seqs = [ list(x) for x in possible_diag2_seqs_set ]
-
-
-        # Count how many 5 consecutive coordinates - sequences -  in a row, col, or diag
-        for possible_col_seq in possible_col_seqs:
-            num_black = 0
-            for coordinate in possible_col_seq:
-                if board[coordinate] == 1:
-                    num_black += 1
-            if num_black == 5:
-                black_five += 1
-
-        for possible_row_seq in possible_row_seqs:
-            num_black = 0
-            for coordinate in possible_row_seq:
-                if board[coordinate] == 1:
-                    num_black += 1
-            if num_black == 5:
-                black_five += 1
-        
-        for possible_diag1_seq in possible_diag1_seqs:
-            num_black = 0
-            for coordinate in possible_diag1_seq:
-                if board[coordinate] == 1:
-                    num_black += 1
-            if num_black == 5:
-                black_five += 1
-        
-        for possible_diag2_seq in possible_diag2_seqs:
-            num_black = 0
-            for coordinate in possible_diag2_seq:
-                if board[coordinate] == 1:
-                    num_black += 1
-            if num_black == 5:
-                black_five += 1
-
-        
-
-        # Repeat for white as the winner
-        # I realized that there are some duplicate codes here, and I might want to clean it up in the future
-        possible_col_seqs = []
-        possible_row_seqs = []
-        possible_diag1_seqs = []
-        possible_diag2_seqs = []
-
-        for white in self.whites:
-            row_num = white[0]
-            col_num = white[1]
-            
-            # Find all possible coordinates that makes black the winner
-            possible_col_coordinates = []
-            possible_row_coordinates = []
-            possible_diag1_coordinates = []
-            possible_diag2_coordinates = []
-
-            # Coordinates in the same row or the same column
-            for x in range(0, BOARD_SIZE):
-                if abs(x - row_num) < 5:
-                    possible_col_coordinates.append((x, col_num))
-                if abs(x - col_num) < 5:
-                    possible_row_coordinates.append((row_num, x))
-
-            # Append the sequence if the coordinates make five-in-a-row or five-in-a-column
-            while len(possible_col_coordinates) >= 5:
-                possible_col_seqs.append(possible_col_coordinates[0:5])
-                possible_col_coordinates.pop(0)
-            while len(possible_row_coordinates) >= 5:
-                possible_row_seqs.append(possible_row_coordinates[0:5])
-                possible_row_coordinates.pop(0)
-
-
-            # Diagonal 1
-            # Upper-left corner coordinates
-            row_index = row_num
-            col_index = col_num
-            while (row_index > -1) and (col_index > -1):
-                if (abs(row_index - row_num) + abs(col_index - col_num)) < 5 * 2:
-                    possible_diag1_coordinates.insert(0, (row_index, col_index))
-                row_index -= 1
-                col_index -= 1
-            
-            # Lower-right corner coordinates
-            row_index = row_num
-            col_index = col_num
-            while (row_index + 1 < BOARD_SIZE) and (col_index + 1 < BOARD_SIZE):
-                if (abs(row_index - row_num) + abs(col_index - col_num)) < 5 * 2:
-                    possible_diag1_coordinates.append((row_index + 1, col_index + 1))
-                row_index += 1
-                col_index += 1
-            
-            # Append the sequence if the coordinates make five-in-a-diagonal
-            while len(possible_diag1_coordinates) >= 5:
-                possible_diag1_seqs.append(possible_diag1_coordinates[0:5])
-                possible_diag1_coordinates.pop(0)
-
-            
-            # Diagonal 2
-            # Upper-right corner coordinates
-            row_index = row_num
-            col_index = col_num
-            while (row_index > -1) and (col_index < BOARD_SIZE):
-                if (abs(row_index - row_num) + abs(col_index - col_num)) < 5 * 2:
-                    possible_diag2_coordinates.insert(0, (row_index, col_index))
-                row_index -= 1
-                col_index += 1
-            
-            # Lower-left corner coordinates
-            row_index = row_num
-            col_index = col_num
-            while (row_index + 1 < BOARD_SIZE) and (col_index - 1 > -1) and (col_index + 1 < BOARD_SIZE):
-                if (abs(row_index - row_num) + abs(col_index - col_num)) < 5 * 2:
-                    possible_diag2_coordinates.append((row_index + 1, col_index - 1))
-                row_index += 1
-                col_index -= 1
-            
-            # Append the sequence if the coordinates make five-in-a-diagonal
-            while len(possible_diag2_coordinates) >= 5:
-                possible_diag2_seqs.append(possible_diag2_coordinates[0:5])
-                possible_diag2_coordinates.pop(0)
-            
-        # Remove duplicate sequences
-        possible_col_seqs.sort()
-        possible_col_seqs = list(possible_col_seqs for possible_col_seqs,_ in itertools.groupby(possible_col_seqs))
-        possible_row_seqs.sort()
-        possible_row_seqs = list(possible_row_seqs for possible_row_seqs,_ in itertools.groupby(possible_row_seqs))
-        possible_diag1_seqs_set = set(tuple(x) for x in possible_diag1_seqs)
-        possible_diag1_seqs = [ list(x) for x in possible_diag1_seqs_set ]
-        possible_diag2_seqs_set = set(tuple(x) for x in possible_diag2_seqs)
-        possible_diag2_seqs = [ list(x) for x in possible_diag2_seqs_set ]
-
-
-        # Count how many 5 in a row, seq, or diag
-        for possible_col_seq in possible_col_seqs:
-            num_white = 0
-            for coordinate in possible_col_seq:
-                if board[coordinate] == 2:
-                    num_white += 1
-            if num_white == 5:
-                white_five += 1
-
-        for possible_row_seq in possible_row_seqs:
-            num_white = 0
-            for coordinate in possible_row_seq:
-                if board[coordinate] == 2:
-                    num_white += 1
-            if num_white == 5:
-                white_five += 1
-
-        for possible_diag1_seq in possible_diag1_seqs:
-            num_white = 0
-            for coordinate in possible_diag1_seq:
-                if board[coordinate] == 2:
-                    num_white += 1
-            if num_white == 5:
-                white_five += 1
-        
-        for possible_diag2_seq in possible_diag2_seqs:
-            num_white = 0
-            for coordinate in possible_diag2_seq:
-                if board[coordinate] == 2:
-                    num_white += 1
-            if num_white == 5:
-                white_five += 1
-
-
-        #if we have 5 stones of either black or white?        
-        if black_five > 0:
-            self.gameStatus = 1
-            return True
-        if white_five > 0:
-            self.gameStatus = 2
-            return True
-
-        if list(board.values()).count(0) == 0:
-            self.gameStatus = 0
-            return True
-
-        return False
+        # Game is still in progress
+        return 0
 
 
     def get_threat_patterns(self, color: int, length: int) -> tuple([int, int]):
-        """Return the numbers of open and  half open consecutive stones - threat patterns - in a tuple given a player and a pattern size.
-         
-         Open threat pattern: patterns without opponent stones on both sides
+        """
+        Identifies specific configurations of stones on the board. 
 
-         Half open threat pattern: patterns with an opponent stone on either side
+        Args:
+        - color: 1 for black, 2 for white.
+        - length: The length of the sequence to look for.
 
-         The size range of a threat pattern is 2 to 4. 
-    
-         """
+        Returns: 
+        - A list of two integers representing the number of open and half-open sequences of the specified length for the given color.
+        """
          
         board = self.state
+
+        # Initialize counts for open and half-open sequences.
         open = 0
         half = 0
         
@@ -595,9 +340,16 @@ class Gomoku:
     
 
     def get_possible_moves(self) -> List["Gomoku"]:
-        """Find the neighbors of all filled cells as all next possible moves,
-            return a list of child Gomoku objects with each neighbor filled
         """
+        Generates all possible moves for the current state of the board.
+
+        Args:
+        - color: 1 for black, 2 for white.
+
+        Returns:
+        - A list of tuples representing the coordinates of all possible moves.
+        """
+
         lst = []
         filled = [x for x in self.state if self.state[x] > 0]
 
@@ -625,15 +377,24 @@ class Gomoku:
             if self.state[m] == 0:
                 if len(self.blacks) > len(self.whites):
                     state_copy[m] = 2
-                    lst.append(Gomoku(state_copy, self.state, curr_depth=self.curr_depth+1))
+                    lst.append(Gomoku(state_copy, curr_depth=self.curr_depth+1))
                 else:
                     state_copy[m] = 1
-                    lst.append(Gomoku(state_copy, self.state, curr_depth=self.curr_depth+1))
+                    lst.append(Gomoku(state_copy, curr_depth=self.curr_depth+1))
                 
         return lst
 
     def minimax(self, maximizing: bool, depth: int) -> int:
-        """Return the score of min or max depending on the perspective"""
+        """
+        The Minimax algorithm without alpha-beta pruning.
+
+        Args:
+        - maximizing: True if the current level is a maximizing level, False if it's a minimizing level.
+        - depth: The current depth of the game tree.
+        
+        Returns:
+        - The best score.
+        """
         
         if self.is_terminal() or self.curr_depth > depth:
             # Count black patterns
@@ -680,7 +441,16 @@ class Gomoku:
 
 
     def new_minimax(self, maximizing: bool, depth: int, alpha=float('-inf'), beta=float('inf')) -> tuple([int, dict]):
-        """With alpha-beta pruning, return the score of min or max depending on the perspective"""
+        """
+        The Minimax algorithm with alpha-beta pruning.
+
+        Args:
+        - maximizing: True if the current level is a maximizing level, False if it's a minimizing level.
+        - depth: The current depth of the game tree.
+
+        Returns:
+        - The best score.
+        """
         
         if self.is_terminal() or self.curr_depth > depth:
             # Count black patterns
@@ -735,7 +505,13 @@ class Gomoku:
 
 
     def best_move(self, depth) -> tuple([tuple([int, int]), int]):
-        """Return the best move for black based on score calculated from minimax"""
+        """
+        Return the best move for black based on score calculated from minimax.
+
+        Args:
+        - depth: The current depth of the game tree.
+        """
+
         filled = [x for x in self.state if self.state[x] > 0]
         move_coordinates = set()
         
@@ -772,10 +548,15 @@ class Gomoku:
 
     
     def play(self, depth) -> int:
-        """Played on the current board, with black uses minimax with depth and white playing randomly"""
+        """
+        Played on the current board, with black uses minimax with depth and white playing randomly.
+
+        Args:
+        - depth: The current depth of the game tree.
+        """
+
         if self.is_terminal():
-            # draw_board(self.state, 9)
-            return self.gameStatus
+            return self.is_terminal()
         
         filled = [x for x in self.state if self.state[x] > 0]
         move_coordinates = set()
@@ -813,10 +594,12 @@ class Gomoku:
 
 
     def play_randomly(self) -> int:
-        """Played on the current board, with both black and white playing randomly"""
+        """
+        Played on the current board, with both black and white playing randomly.
+        """
+        
         if self.is_terminal():
-            # draw_board(self.state, 9)
-            return self.gameStatus
+            return self.is_terminal()
         
         filled = [x for x in self.state if self.state[x] > 0]
         move_coordinates = set()
