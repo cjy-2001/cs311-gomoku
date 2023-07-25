@@ -23,9 +23,9 @@ Gomoku, or five in a row, is an abstract strategy board game where two players p
 
 We intend to implement the minimax algorithm with alpha-beta pruning and heuristic functions in Gomoku. We also explore how limiting relevant moves and different depth limits affect algorithm performance based on both search time and wining chances. 
 
-![CS 311 Final Project Poster](https://github.com/cjy-2001/cs311-gomoku/blob/main/CS%20311%20Final%20Project%20Poster%20(PNG).png)
+![CS 311 Final Project Poster](https://github.com/cjy-2001/cs311-gomoku/blob/main/CS%20311%20Final%20Project%20Poster.png)
 
-For our final report, please refer to [CS 311 Final Project Report](https://github.com/cjy-2001/cs311-gomoku/blob/main/CS%20311%20Final%20Project%20Report.pdf) and [CS 311 Final Project Poster](https://github.com/cjy-2001/cs311-gomoku/blob/main/CS%20311%20Final%20Project%20Poster.pdf).
+For our final report, please refer to [CS 311 Final Project Report](https://github.com/cjy-2001/cs311-gomoku/blob/main/CS%20311%20Final%20Project%20Report.pdf) and [CS 311 Final Project Poster](https://github.com/cjy-2001/cs311-gomoku/blob/main/CS%20311%20Final%20Project%20Poster.png).
 
 ## Install
 
